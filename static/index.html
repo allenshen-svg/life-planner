@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>时光记 · 生活规划与记录</title>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <header class="app-header">
+    <div>
+      <h1>时光记</h1>
+      <div class="subtitle">LIFE PLANNER</div>
+    </div>
+    <div class="header-right">
+      <select v-model="aiProvider" title="AI模型">
+        <option value="deepseek">DeepSeek</option>
+        <option value="zhipu">智谱</option>
+        <option value="siliconflow">SiliconFlow</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Tab Bar -->
+  <div class="main-content">
+    <div class="tab-bar">
+      <div class="tab-item" :class="{active: tab==='plan'}" @click="tab='plan'">
+        <span class="tab-icon">◎</span>规划
+      </div>
+      <div class="tab-item" :class="{active: tab==='diary'}" @click="tab='diary'">
+        <span class="tab-icon">✎</span>日记
+      </div>
+      <div class="tab-item" :class="{active: tab==='review'}" @click="tab='review'">
+        <span class="tab-icon">▦</span>回顾
+      </div>
+    </div>
+
+    <!-- ═══ PLAN TAB ═══ -->
+    <div v-if="tab==='plan'">
+      <!-- Date Quick Pick -->
+      <div class="date-quick">
+        <div v-for="d in next7Days" :key="d.date"
+             class="date-quick-item" :class="{active: planDate===d.date}"
+             @click="planDate=d.date">
+          <span class="day-name">{{d.label}}</span>
+          {{d.day}}
+        </div>
+      </div>
+
+      <!-- Add Plan Button -->
+      <div style="margin-bottom:14px">
+        <button class="btn btn-primary btn-block" @click="showPlanModal=true">
+          + 添加计划
+        </button>
+      </div>
+
+      <!-- AI Suggestions -->
+      <div class="card" v-if="planCity">
+        <div class="card-title">智能推荐</div>
+        <div class="btn-group">
+          <button class="btn btn-outline btn-sm" @click="getHotActivities">热门活动</button>
+          <button class="btn btn-outline btn-sm" @click="getSuggestPlaces('food')">美食推荐</button>
+          <button class="btn btn-outline btn-sm" @click="getSuggestPlaces('fun')">好玩推荐</button>
+        </div>
+      </div>
+
+      <!-- AI Result -->
+      <div class="ai-panel" v-if="aiPlanResult">
+        <div class="ai-title">AI 推荐</div>
+        <div class="ai-result" v-if="!aiPlanLoading">{{aiPlanResult}}</div>
+        <div class="ai-loading" v-else><div class="spinner"></div><p>正在获取推荐...</p></div>
+      </div>
+
+      <!-- Plan List -->
+      <div v-if="filteredPlans.length">
+        <div v-for="p in filteredPlans" :key="p.id"
+             class="plan-item" :class="'cat-'+p.category">
+          <div class="plan-time">{{p.time_start}} — {{p.time_end}}</div>
+          <div class="plan-title">{{p.title}}</div>
+          <div class="plan-location" v-if="p.location">{{p.location}}</div>
+          <div class="plan-actions">
+            <button @click="sharePlan(p)" title="分享">↗</button>
+            <button @click="editPlan(p)" title="编辑">✎</button>
+            <button @click="deletePlan(p.id)" title="删除">×</button>
+          </div>
+          <!-- Transport between plans -->
+          <div v-if="p._nextLocation" style="margin-top:8px">
+            <button class="btn btn-outline btn-sm"
+                    @click="getTransport(p.location, p._nextLocation)">
+              到下一站交通 →
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-else class="empty-state">
+        <div class="empty-icon">○</div>
+        <p>这一天还没有计划<br>点击上方按钮添加吧</p>
+      </div>
+
+      <!-- Transport Result -->
+      <div class="ai-panel" v-if="aiTransportResult">
+        <div class="ai-title">交通建议</div>
+        <div class="ai-result" v-if="!aiTransportLoading">{{aiTransportResult}}</div>
+        <div class="ai-loading" v-else><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ DIARY TAB ═══ -->
+    <div v-if="tab==='diary'">
+      <div style="margin-bottom:14px">
+        <button class="btn btn-primary btn-block" @click="showDiaryModal=true">
+          + 写日记
+        </button>
+      </div>
+
+      <!-- Diary List -->
+      <div v-if="diaryEntries.length">
+        <div v-for="e in diaryEntries" :key="e.id" class="diary-item">
+          <div class="diary-header">
+            <span class="diary-date">{{e.date}}</span>
+            <span class="diary-mood">{{moodEmoji(e.mood)}}</span>
+          </div>
+          <div class="diary-tags" v-if="e.tags && e.tags.length">
+            <span class="diary-tag" v-for="t in e.tags" :key="t">{{t}}</span>
+          </div>
+          <div class="diary-content">{{e.content}}</div>
+          <div class="diary-actions">
+            <button class="btn btn-outline btn-sm" @click="editDiary(e)">编辑</button>
+            <button class="btn btn-sm" style="color:var(--rose)" @click="deleteDiary(e.id)">删除</button>
+          </div>
+        </div>
+      </div>
+      <div v-else class="empty-state">
+        <div class="empty-icon">○</div>
+        <p>今天还没有写日记<br>记录下你的生活吧</p>
+      </div>
+    </div>
+
+    <!-- ═══ REVIEW TAB ═══ -->
+    <div v-if="tab==='review'">
+      <!-- Calendar -->
+      <div class="card">
+        <div class="calendar-nav">
+          <button @click="calPrev">‹</button>
+          <span class="calendar-month">{{calYear}}年{{calMonth+1}}月</span>
+          <button @click="calNext">›</button>
+        </div>
+        <div class="calendar-grid">
+          <div class="cal-header" v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{d}}</div>
+          <div v-for="(d,i) in calDays" :key="i"
+               class="cal-day"
+               :class="{today: d.isToday, selected: d.date===reviewDate, 'other-month': d.otherMonth}"
+               @click="reviewDate=d.date; loadReviewDay()">
+            {{d.num}}
+            <span class="dot has-plan" v-if="d.hasPlan"></span>
+            <span class="dot has-diary" v-if="d.hasDiary"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Day Summary -->
+      <div class="card" v-if="reviewDate">
+        <div class="card-title">{{reviewDate}} 的记录</div>
+        <div v-if="reviewDayPlans.length" style="margin-bottom:10px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">计划：</div>
+          <div v-for="p in reviewDayPlans" :key="p.id" style="font-size:13px;margin-bottom:4px">
+            {{p.time_start}}-{{p.time_end}} {{p.title}} <span v-if="p.location" style="color:var(--text2)">{{p.location}}</span>
+          </div>
+        </div>
+        <div v-if="reviewDayDiary.length">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">日记：</div>
+          <div v-for="e in reviewDayDiary" :key="e.id" style="font-size:13px;margin-bottom:4px">
+            {{moodEmoji(e.mood)}} {{e.content && e.content.substring(0,80)}}...
+          </div>
+        </div>
+        <div v-if="!reviewDayPlans.length && !reviewDayDiary.length">
+          <div class="empty-state" style="padding:16px"><p>这一天没有记录</p></div>
+        </div>
+      </div>
+
+      <!-- AI Life Review -->
+      <div class="card">
+        <div class="card-title">AI 生活点评</div>
+        <div class="btn-group" style="margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" @click="getLifeReview('week')">本周回顾</button>
+          <button class="btn btn-outline btn-sm" @click="getLifeReview('month')">本月回顾</button>
+        </div>
+        <div class="ai-loading" v-if="aiReviewLoading"><div class="spinner"></div><p>AI正在分析你的生活...</p></div>
+        <div class="ai-result" v-if="aiReviewResult && !aiReviewLoading">{{aiReviewResult}}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Plan Modal ═══ -->
+  <div class="modal-overlay" v-if="showPlanModal" @click.self="showPlanModal=false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{editingPlan ? '编辑计划' : '添加计划'}}</h3>
+        <button class="modal-close" @click="showPlanModal=false">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">日期</label>
+        <input type="date" class="form-input" v-model="planForm.date">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">开始时间</label>
+          <input type="time" class="form-input" v-model="planForm.time_start">
+        </div>
+        <div class="form-group">
+          <label class="form-label">结束时间</label>
+          <input type="time" class="form-input" v-model="planForm.time_end">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">做什么</label>
+        <!-- Search input -->
+        <div class="dropdown-wrap" style="margin-bottom:10px">
+          <input type="text" class="form-input" v-model="activityQuery"
+                 placeholder="搜索活动 或 自定义输入…"
+                 @focus="showActivityDropdown=true"
+                 @input="showActivityDropdown=true"
+                 @blur="showActivityDropdown=false">
+          <div class="dropdown-list" v-if="showActivityDropdown && activityQuery && filteredActivities.length"
+               @mousedown.prevent>
+            <div v-for="a in filteredActivities" :key="a"
+                 class="dropdown-item" @click="selectActivity(a)">
+              {{a}}
+            </div>
+          </div>
+        </div>
+        <!-- Category tabs -->
+        <div class="act-tabs">
+          <span v-for="(g,i) in ACTIVITY_GROUPS" :key="g.label"
+                class="act-tab" :class="{active: activityTab===i}"
+                @click="activityTab=i">{{g.label}}</span>
+        </div>
+        <!-- Activity chips -->
+        <div class="act-chips">
+          <span v-for="a in ACTIVITY_GROUPS[activityTab].items" :key="a"
+                class="act-chip" :class="{active: planForm.title===a}"
+                @click="selectActivity(a)">{{a}}</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">城市</label>
+          <select class="form-select" v-model="planForm.city">
+            <option v-for="c in CITIES" :key="c" :value="c">{{c}}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">类别</label>
+          <select class="form-select" v-model="planForm.category">
+            <option value="food">美食</option>
+            <option value="shopping">购物</option>
+            <option value="exercise">运动</option>
+            <option value="social">社交</option>
+            <option value="work">工作</option>
+            <option value="travel">旅行</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">地点</label>
+        <div class="dropdown-wrap">
+          <input type="text" class="form-input" v-model="addressQuery"
+                 placeholder="输入地址关键字…"
+                 @input="onAddressInput"
+                 @focus="showAddressDropdown=addressSuggestions.length>0"
+                 @blur="showAddressDropdown=false">
+          <div class="dropdown-list" v-if="showAddressDropdown && addressSuggestions.length"
+               @mousedown.prevent>
+            <div v-for="s in addressSuggestions" :key="s"
+                 class="dropdown-item" @click="selectAddress(s)">
+              {{s}}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <textarea class="form-textarea" v-model="planForm.notes" placeholder="其他备注..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" @click="savePlan">
+        {{editingPlan ? '保存修改' : '添加计划'}}
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Diary Modal ═══ -->
+  <div class="modal-overlay" v-if="showDiaryModal" @click.self="showDiaryModal=false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{editingDiary ? '编辑日记' : '写日记'}}</h3>
+        <button class="modal-close" @click="showDiaryModal=false">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">日期</label>
+        <input type="date" class="form-input" v-model="diaryForm.date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">今天的心情</label>
+        <div class="mood-selector">
+          <div v-for="m in moods" :key="m.key"
+               class="mood-btn" :class="{active: diaryForm.mood===m.key}"
+               @click="diaryForm.mood=m.key" :title="m.label">
+            {{m.emoji}}
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">标签</label>
+        <div class="tag-list">
+          <span v-for="t in allTags" :key="t"
+                class="tag" :class="{active: diaryForm.tags.includes(t)}"
+                @click="toggleTag(t)">{{t}}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">记录你的一天</label>
+        <textarea class="form-textarea" v-model="diaryForm.content"
+                  placeholder="今天做了什么？有什么感想？遇到了什么开心/烦心的事？"
+                  rows="6"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" @click="saveDiary">
+        {{editingDiary ? '保存修改' : '保存日记'}}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
