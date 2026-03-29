@@ -606,10 +606,53 @@ const app = createApp({
     }
 
     // ─── Complete / Reward ───
-    function toggleDone(id) {
+    function spawnConfetti(evt) {
+      const rect = evt.target.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const colors = ['#5f8a6e','#c59a5f','#c26e6e','#6a9cad','#8a7ba8','#e5c07b','#5f7d6e'];
+      const container = document.createElement('div');
+      container.className = 'confetti-container';
+      document.body.appendChild(container);
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = cx + 'px';
+        el.style.top = cy + 'px';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
+        el.style.setProperty('--dy', -(80 + Math.random() * 200) + 'px');
+        el.style.setProperty('--rot', (Math.random() * 1080 - 540) + 'deg');
+        el.style.setProperty('--dur', (0.6 + Math.random() * 0.6) + 's');
+        el.style.setProperty('--delay', (Math.random() * 0.15) + 's');
+        el.style.width = (4 + Math.random() * 6) + 'px';
+        el.style.height = (4 + Math.random() * 6) + 'px';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        container.appendChild(el);
+      }
+      setTimeout(() => container.remove(), 1400);
+    }
+
+    function toggleDone(id, evt) {
       const all = lsLoad('lp_plans');
       const p = all.find(x => x.id === id);
-      if (p) { p.done = !p.done; lsSave('lp_plans', all); plans.value = all; }
+      if (p) {
+        const wasDone = p.done;
+        p.done = !p.done;
+        lsSave('lp_plans', all);
+        plans.value = all;
+        if (!wasDone && p.done) {
+          // just completed → confetti + highlight
+          if (evt) spawnConfetti(evt);
+          nextTick(() => {
+            const el = document.querySelector(`[data-plan-id="${id}"]`);
+            if (el) {
+              el.classList.add('just-done');
+              setTimeout(() => el.classList.remove('just-done'), 600);
+            }
+          });
+        }
+      }
     }
     const dayReward = computed(() => {
       const dayPlans = plans.value.filter(p => p.date === planDate.value);

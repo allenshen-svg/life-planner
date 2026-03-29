@@ -183,12 +183,12 @@
       <!-- Plan List -->
       <div v-if="filteredPlans.length">
         <div v-for="p in filteredPlans" :key="p.id"
-             class="plan-item" :class="['cat-'+p.category, {done: p.done}]">
+             class="plan-item" :class="['cat-'+p.category, {done: p.done}]" :data-plan-id="p.id">
           <div class="plan-time">{{p.time_start}} — {{p.time_end}}</div>
           <div class="plan-title">{{p.title}}</div>
           <div class="plan-location" v-if="p.location">{{p.location}}</div>
           <div class="plan-actions">
-            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id)" title="完成">{{p.done ? '✅' : '⬜'}}</button>
+            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id, $event)" title="完成">{{p.done ? '✅' : '⬜'}}</button>
             <button @click="sharePlan(p)" title="分享">↗</button>
             <button @click="editPlan(p)" title="编辑">✎</button>
             <button @click="deletePlan(p.id)" title="删除">×</button>
