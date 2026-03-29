@@ -557,11 +557,29 @@ const app = createApp({
     });
 
     // ─── Hot Events ───
-    const hotEvents = computed(() => {
+    const hotCategory = ref('全部');
+    const hotExpanded = ref(false);
+    const allCityEvents = computed(() => {
       const city = planCity.value;
-      const events = HOT_EVENTS[city] || HOT_EVENTS['_default'];
-      return events.sort((a, b) => b.heat - a.heat);
+      return (HOT_EVENTS[city] || HOT_EVENTS['_default']).sort((a, b) => b.heat - a.heat);
     });
+    const hotCategories = computed(() => {
+      const tags = [...new Set(allCityEvents.value.map(e => e.tag))];
+      return ['全部', ...tags];
+    });
+    const hotEvents = computed(() => {
+      const cat = hotCategory.value;
+      const list = cat === '全部' ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
+      return hotExpanded.value ? list : list.slice(0, 4);
+    });
+    const hotHasMore = computed(() => {
+      const cat = hotCategory.value;
+      const list = cat === '全部' ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
+      return list.length > 4;
+    });
+    watch(hotCategory, () => { hotExpanded.value = false; });
+    watch(planCity, () => { hotCategory.value = '全部'; hotExpanded.value = false; });
+    function toggleHotExpand() { hotExpanded.value = !hotExpanded.value; }
     function addHotEvent(ev) {
       planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: ev.title, category: 'other', location: ev.loc, notes: `${ev.tag} · ${ev.date}` };
       activityQuery.value = ev.title;
@@ -589,7 +607,7 @@ const app = createApp({
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
-      hotEvents, addHotEvent,
+      hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,

@@ -111,8 +111,11 @@
       </div>
 
       <!-- Hot Events -->
-      <div class="card" v-if="hotEvents.length">
+      <div class="card" v-if="hotEvents.length || hotCategories.length > 1">
         <div class="card-title">🔥 {{planCity}} 热门活动</div>
+        <div class="hot-cat-tabs">
+          <span v-for="c in hotCategories" :key="c" class="hot-cat-tab" :class="{active: hotCategory===c}" @click="hotCategory=c">{{c}}</span>
+        </div>
         <div class="hot-events">
           <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="addHotEvent(ev)">
             <div class="hot-event-left">
@@ -127,6 +130,9 @@
               <div class="heat-bar"><div class="heat-fill" :style="{width: ev.heat+'%'}"></div></div>
             </div>
           </div>
+        </div>
+        <div class="hot-expand" v-if="hotHasMore" @click="toggleHotExpand">
+          {{hotExpanded ? '收起 ▲' : '查看更多 ▼'}}
         </div>
       </div>
 
