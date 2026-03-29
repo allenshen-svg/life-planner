@@ -357,6 +357,13 @@ const app = createApp({
     }
 
     const tab = ref('plan');
+    const tabBar = ref(null);
+    const tabIndicatorStyle = computed(() => {
+      const tabs = ['plan', 'diary', 'review'];
+      const idx = tabs.indexOf(tab.value);
+      const pct = 100 / tabs.length;
+      return { left: (idx * pct) + '%', width: pct + '%' };
+    });
     const aiProvider = ref(localStorage.getItem('lp_aiProvider') || 'deepseek');
 
     watch(aiProvider, v => localStorage.setItem('lp_aiProvider', v));
@@ -893,7 +900,7 @@ const app = createApp({
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
       hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand, hotDetail, openHotDetail, closeHotDetail,
       dailyQuote, refreshQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
-      tab, aiProvider,
+      tab, tabBar, tabIndicatorStyle, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
       showPlanModal, editingPlan, planForm,

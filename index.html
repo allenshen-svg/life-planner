@@ -101,7 +101,8 @@
     </div>
 
     <!-- Tab Bar -->
-    <div class="tab-bar">
+    <div class="tab-bar" ref="tabBar">
+      <div class="tab-indicator" :style="tabIndicatorStyle"></div>
       <div class="tab-item" :class="{active: tab==='plan'}" @click="tab='plan'">
         <span class="tab-icon">◎</span>规划
       </div>

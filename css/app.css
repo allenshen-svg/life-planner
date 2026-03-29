@@ -49,13 +49,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .quote-add:hover{color:var(--indigo)}
 
 /* Tab Bar */
-.tab-bar{display:flex;background:var(--surface);border-radius:var(--r-pill);padding:4px;margin:12px 0 20px;box-shadow:var(--shadow-sm)}
-.tab-item{flex:1;text-align:center;padding:11px 8px;border-radius:var(--r-pill);cursor:pointer;font-size:13px;font-weight:600;color:var(--text3);transition:all .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;align-items:center;gap:2px;-webkit-tap-highlight-color:transparent}
+.tab-bar{display:flex;background:transparent;border-radius:var(--r-pill);padding:0;margin:12px 0 20px;position:relative}
+.tab-item{flex:1;text-align:center;padding:11px 8px;border-radius:var(--r-pill);cursor:pointer;font-size:13px;font-weight:600;color:var(--text3);transition:all .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;align-items:center;gap:2px;-webkit-tap-highlight-color:transparent;position:relative;z-index:1}
 .tab-item .tab-icon{font-size:16px;transition:transform .3s ease}
 .tab-item:active .tab-icon{transform:scale(1.2)}
-.tab-item:not(.active){border:1px solid var(--border-ui)}
-.tab-item.active{color:#fff;background:var(--indigo);box-shadow:0 2px 8px rgba(95,125,110,0.2);border:2px solid transparent}
+.tab-item.active{color:#fff}
 .tab-item:not(.active):hover{color:var(--text2)}
+.tab-indicator{position:absolute;top:0;bottom:0;border-radius:var(--r-pill);background:var(--indigo);box-shadow:0 2px 8px rgba(95,125,110,0.2);transition:left .35s cubic-bezier(.4,0,.2,1),width .35s cubic-bezier(.4,0,.2,1);z-index:0}
 
 /* Cards */
 .card{background:var(--surface);border-radius:var(--r);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm);transition:box-shadow .25s;border:1px solid var(--border)}
