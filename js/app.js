@@ -373,16 +373,16 @@ const app = createApp({
 
     // ─── Theme Color Picker ───
     const themeColors = [
-      { value: '#5f7d6e', label: '墨绿' },
-      { value: '#6a9cad', label: '天蓝' },
-      { value: '#8a7ba8', label: '薰衣草' },
-      { value: '#c26e6e', label: '玫瑰' },
       { value: '#c59a5f', label: '琥珀' },
-      { value: '#5a8f9a', label: '青碧' },
-      { value: '#b07a8a', label: '桃粉' },
-      { value: '#6b7b8d', label: '石墨' },
+      { value: '#7cb8ca', label: '天蓝' },
+      { value: '#a494c4', label: '薰衣草' },
+      { value: '#e08888', label: '玫瑰' },
+      { value: '#7aad8b', label: '墨绿' },
+      { value: '#5ab8c7', label: '青碧' },
+      { value: '#c99aaa', label: '桃粉' },
+      { value: '#8a9ab0', label: '石墨' },
     ];
-    const themeColor = ref(localStorage.getItem('lp_theme') || '#5f7d6e');
+    const themeColor = ref(localStorage.getItem('lp_theme') || '#c59a5f');
     const showThemePicker = ref(false);
     function setTheme(color) {
       themeColor.value = color;
