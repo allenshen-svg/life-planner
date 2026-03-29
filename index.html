@@ -7,7 +7,49 @@
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<div id="app">
+<div id="app" v-cloak>
+  <!-- ═══ Onboarding ═══ -->
+  <div class="onboard-overlay" v-if="showOnboarding">
+    <div class="onboard-card">
+      <!-- Step 1: Nickname -->
+      <template v-if="onboardStep===1">
+        <div class="onboard-title">👋 你好呀</div>
+        <div class="onboard-sub">欢迎来到时光记，先给自己取个名字吧</div>
+        <div class="onboard-step">STEP 1 / 3</div>
+        <input class="onboard-input" v-model="obNickname" placeholder="输入你的昵称…" maxlength="12" @keyup.enter="onboardNext">
+        <div class="onboard-btns">
+          <button class="btn btn-primary btn-block" @click="onboardNext" :disabled="!obNickname.trim()">下一步 →</button>
+        </div>
+      </template>
+      <!-- Step 2: Avatar -->
+      <template v-if="onboardStep===2">
+        <div class="onboard-avatar-preview">{{obAvatar}}</div>
+        <div class="onboard-title">选个头像</div>
+        <div class="onboard-sub">挑一个你喜欢的可爱图标</div>
+        <div class="onboard-step">STEP 2 / 3</div>
+        <div class="avatar-grid">
+          <div v-for="a in avatars" :key="a" class="avatar-opt" :class="{active: obAvatar===a}" @click="obAvatar=a">{{a}}</div>
+        </div>
+        <div class="onboard-btns">
+          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
+          <button class="btn btn-primary" @click="onboardNext">下一步 →</button>
+        </div>
+      </template>
+      <!-- Step 3: Age (optional) -->
+      <template v-if="onboardStep===3">
+        <div class="onboard-avatar-preview">{{obAvatar}}</div>
+        <div class="onboard-title">{{obNickname}}，最后一步</div>
+        <div class="onboard-sub">你的年龄是？（可以跳过）</div>
+        <div class="onboard-step">STEP 3 / 3</div>
+        <input class="onboard-input" v-model="obAge" type="number" placeholder="年龄（选填）" min="1" max="120" @keyup.enter="onboardNext">
+        <div class="onboard-btns">
+          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
+          <button class="btn btn-primary" @click="onboardNext">开始使用 🎉</button>
+        </div>
+      </template>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="app-header">
     <div>
@@ -15,6 +57,10 @@
       <div class="subtitle">LIFE PLANNER</div>
     </div>
     <div class="header-right">
+      <div class="profile-chip" v-if="profile">
+        <span class="avatar-sm">{{profile.avatar}}</span>
+        <span>{{profile.nickname}}</span>
+      </div>
       <select v-model="aiProvider" title="AI模型">
         <option value="deepseek">DeepSeek</option>
         <option value="zhipu">智谱</option>

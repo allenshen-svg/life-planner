@@ -6,6 +6,15 @@ const API = '';  // unused, kept for compat
 // ─── localStorage helpers ───
 function lsLoad(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
 function lsSave(key, arr) { localStorage.setItem(key, JSON.stringify(arr)); }
+function lsObj(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+
+// ─── Avatar Gallery ───
+const AVATARS = [
+  '🐱','🐶','🐰','🦊','🐻','🐼','🐨','🐯',
+  '🦁','🐸','🐧','🐦','🦄','🐝','🐙','🦋',
+  '🌸','🌻','🌈','⭐','🍀','🎀','🧸','🎨',
+  '🎵','🌙','☀️','🍎','🍩','🧁','🎪','🪐',
+];
 
 const MOODS = [
   { key: 'great',   emoji: '😄', label: '很棒' },
@@ -83,6 +92,35 @@ function formatDate(offset) {
 
 const app = createApp({
   setup() {
+    // ─── Onboarding / Profile ───
+    const profile = ref(lsObj('lp_profile'));
+    const showOnboarding = ref(!profile.value);
+    const onboardStep = ref(1);  // 1=nickname, 2=avatar, 3=age
+    const obNickname = ref('');
+    const obAvatar = ref('🐱');
+    const obAge = ref('');
+
+    function onboardNext() {
+      if (onboardStep.value === 1) {
+        if (!obNickname.value.trim()) return;
+        onboardStep.value = 2;
+      } else if (onboardStep.value === 2) {
+        onboardStep.value = 3;
+      } else {
+        const p = {
+          nickname: obNickname.value.trim(),
+          avatar: obAvatar.value,
+          age: obAge.value ? parseInt(obAge.value) : null,
+        };
+        localStorage.setItem('lp_profile', JSON.stringify(p));
+        profile.value = p;
+        showOnboarding.value = false;
+      }
+    }
+    function onboardBack() {
+      if (onboardStep.value > 1) onboardStep.value--;
+    }
+
     const tab = ref('plan');
     const aiProvider = ref(localStorage.getItem('lp_aiProvider') || 'deepseek');
 
@@ -395,6 +433,10 @@ const app = createApp({
     });
 
     return {
+      // Onboarding
+      showOnboarding, onboardStep, obNickname, obAvatar, obAge,
+      onboardNext, onboardBack, profile,
+      avatars: AVATARS,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
