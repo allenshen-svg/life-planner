@@ -363,6 +363,57 @@ const app = createApp({
 
     watch(aiProvider, v => localStorage.setItem('lp_aiProvider', v));
 
+    // ─── Daily Quote + User Motto ───
+    const DAILY_QUOTES = [
+      { text: '生活不是等待暴风雨过去，而是学会在雨中跳舞。', author: '维维安·格林' },
+      { text: '种一棵树最好的时间是十年前，其次是现在。', author: '中国谚语' },
+      { text: '不要因为走得太远，而忘记为什么出发。', author: '纪伯伦' },
+      { text: '世界上只有一种英雄主义，就是看清生活的真相后依然热爱它。', author: '罗曼·罗兰' },
+      { text: '把每一天当作生命的最后一天来过，总有一天你会发现自己是对的。', author: '乔布斯' },
+      { text: '你要做一个不动声色的大人了，不准情绪化。', author: '村上春树' },
+      { text: '我们终此一生，就是要摆脱他人的期待，找到真正的自己。', author: '伍绮诗' },
+      { text: '人生就像骑自行车，要保持平衡就得不断前进。', author: '爱因斯坦' },
+      { text: '所有伟大的行为和思想，都有一个微不足道的开始。', author: '加缪' },
+      { text: '你无法改变风的方向，但你可以调整帆的角度。', author: '吉米·迪恩' },
+      { text: '生命中最困难的时刻，也许正是转变的时刻。', author: '毕淑敏' },
+      { text: '一个人的价值，在于他贡献了什么，而不在于他能获得什么。', author: '爱因斯坦' },
+      { text: '当你觉得为时已晚的时候，恰恰是最早的时候。', author: '哈佛校训' },
+      { text: '每一个不曾起舞的日子，都是对生命的辜负。', author: '尼采' },
+      { text: '悲观者在每个机会中看到困难，乐观者在每个困难中看到机会。', author: '丘吉尔' },
+      { text: '做你害怕做的事情，然后你会发现，不过如此。', author: '拉尔夫·爱默生' },
+      { text: '日拱一卒，功不唐捐。', author: '曾国藩' },
+      { text: '既然选择了远方，便只顾风雨兼程。', author: '汪国真' },
+      { text: '永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。', author: '马克·吐温' },
+      { text: '我不去想是否能够成功，既然选择了远方，便只顾风雨兼程。', author: '汪国真' },
+      { text: '生活就像海洋，只有意志坚强的人才能到达彼岸。', author: '马克思' },
+      { text: '不要去追一匹马，用追马的时间种草。', author: '丰子恺' },
+      { text: '纵有疾风起，人生不言弃。', author: '保尔·瓦雷里' },
+      { text: '任何值得到达的地方都没有捷径。', author: '贝弗利·希尔斯' },
+      { text: '心之所向，素履以往。', author: '七堇年' },
+      { text: '只有流过血的手指，才能弹出世间的绝唱。', author: '泰戈尔' },
+      { text: '努力不一定成功，但放弃一定失败。', author: '李嘉诚' },
+      { text: '你不能控制风向，但你可以调整风帆。', author: '本杰明·富兰克林' },
+      { text: '自律给我自由。', author: 'Keep 标语' },
+      { text: '星光不问赶路人，时光不负有心人。', author: '大冰' },
+      { text: '知不足而奋进，望远山而前行。', author: '左传' },
+    ];
+    function getTodayQuote() {
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+      return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+    }
+    const dailyQuote = ref(getTodayQuote());
+    const userMotto = ref(localStorage.getItem('lp_motto') || '');
+    const editingMotto = ref(false);
+    const mottoInput = ref('');
+    function startEditMotto() { mottoInput.value = userMotto.value; editingMotto.value = true; }
+    function saveMotto() {
+      userMotto.value = mottoInput.value.trim();
+      if (userMotto.value) { localStorage.setItem('lp_motto', userMotto.value); }
+      else { localStorage.removeItem('lp_motto'); }
+      editingMotto.value = false;
+    }
+    function deleteMotto() { userMotto.value = ''; localStorage.removeItem('lp_motto'); editingMotto.value = false; }
+
     // ─── Plan ───
     const planDate = ref(today());
     const planCity = ref(localStorage.getItem('lp_city') || '上海');
@@ -795,6 +846,7 @@ const app = createApp({
       avatars: AVATARS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
       hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand, hotDetail, openHotDetail, closeHotDetail,
+      dailyQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,

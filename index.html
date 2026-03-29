@@ -69,8 +69,38 @@
     </div>
   </header>
 
-  <!-- Tab Bar -->
+  <!-- Daily Quote / User Motto -->
   <div class="main-content">
+    <div class="quote-banner">
+      <!-- User motto (pinned, editable) -->
+      <div class="quote-motto" v-if="userMotto && !editingMotto">
+        <div class="quote-motto-pin">📌 我的座右铭</div>
+        <div class="quote-motto-text">{{userMotto}}</div>
+        <div class="quote-motto-actions">
+          <span @click="startEditMotto">✏️</span>
+          <span @click="deleteMotto">🗑️</span>
+        </div>
+      </div>
+      <!-- Edit motto -->
+      <div class="quote-motto-edit" v-if="editingMotto">
+        <input class="quote-motto-input" v-model="mottoInput" placeholder="写下你的座右铭…" maxlength="50" @keyup.enter="saveMotto">
+        <div class="quote-motto-edit-btns">
+          <button class="btn btn-sm btn-primary" @click="saveMotto">保存</button>
+          <button class="btn btn-sm btn-outline" @click="editingMotto=false">取消</button>
+        </div>
+      </div>
+      <!-- Daily famous quote -->
+      <div class="quote-daily">
+        <div class="quote-text">「{{dailyQuote.text}}」</div>
+        <div class="quote-author">—— {{dailyQuote.author}}</div>
+      </div>
+      <!-- Add motto button if none -->
+      <div class="quote-add" v-if="!userMotto && !editingMotto" @click="startEditMotto">
+        + 添加我的座右铭
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
     <div class="tab-bar">
       <div class="tab-item" :class="{active: tab==='plan'}" @click="tab='plan'">
         <span class="tab-icon">◎</span>规划
