@@ -382,18 +382,33 @@ const app = createApp({
       { value: '#c99aaa', label: '桃粉' },
       { value: '#8a9ab0', label: '石墨' },
     ];
+    const bgThemes = [
+      { value: 'coffee', label: '咖啡', emoji: '☕' },
+      { value: 'cloud',  label: '白云', emoji: '☁️' },
+      { value: 'sky',    label: '星空', emoji: '🌌' },
+      { value: 'forest', label: '森林', emoji: '🌲' },
+      { value: 'rose',   label: '玫瑰', emoji: '🌹' },
+      { value: 'lavender', label: '薰衣草', emoji: '💜' },
+    ];
     const themeColor = ref(localStorage.getItem('lp_theme') || '#c59a5f');
+    const bgTheme = ref(localStorage.getItem('lp_bg') || 'coffee');
     const showThemePicker = ref(false);
     function setTheme(color) {
       themeColor.value = color;
       localStorage.setItem('lp_theme', color);
       document.documentElement.style.setProperty('--indigo', color);
-      showThemePicker.value = false;
+    }
+    function setBgTheme(bg) {
+      bgTheme.value = bg;
+      localStorage.setItem('lp_bg', bg);
+      document.documentElement.setAttribute('data-bg', bg === 'coffee' ? '' : bg);
     }
     // Apply saved theme on load
     onMounted(() => {
       const saved = localStorage.getItem('lp_theme');
       if (saved) document.documentElement.style.setProperty('--indigo', saved);
+      const savedBg = localStorage.getItem('lp_bg');
+      if (savedBg && savedBg !== 'coffee') document.documentElement.setAttribute('data-bg', savedBg);
     });
 
     watch(aiProvider, v => localStorage.setItem('lp_aiProvider', v));
@@ -997,6 +1012,7 @@ const app = createApp({
             motto: localStorage.getItem('lp_motto') || '',
             city: localStorage.getItem('lp_city') || '',
             theme: localStorage.getItem('lp_theme') || '',
+            bgTheme: localStorage.getItem('lp_bg') || 'coffee',
           };
           const resp = await fetch(TL_API + '/api/tl/sync', {
             method: 'POST',
@@ -1023,6 +1039,7 @@ const app = createApp({
           if (data.motto) { localStorage.setItem('lp_motto', data.motto); userMotto.value = data.motto; }
           if (data.city) { localStorage.setItem('lp_city', data.city); planCity.value = data.city; }
           if (data.theme) { localStorage.setItem('lp_theme', data.theme); setTheme(data.theme); }
+          if (data.bgTheme) { localStorage.setItem('lp_bg', data.bgTheme); setBgTheme(data.bgTheme); }
           syncStatus.value = 'synced';
           showAccountPanel.value = false;
         }
@@ -1042,6 +1059,7 @@ const app = createApp({
     watch(userMotto, scheduleSync);
     watch(planCity, scheduleSync);
     watch(themeColor, scheduleSync);
+    watch(bgTheme, scheduleSync);
 
     onMounted(() => {
       if (authToken.value) {
@@ -1059,6 +1077,7 @@ const app = createApp({
       dailyQuote, refreshQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
       tab, tabBar, tabIndicatorStyle, aiProvider,
       themeColors, themeColor, showThemePicker, setTheme,
+      bgThemes, bgTheme, setBgTheme,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
       showPlanModal, editingPlan, planForm,

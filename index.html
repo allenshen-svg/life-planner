@@ -78,12 +78,22 @@
         <span class="sync-dot" :class="syncStatus" v-if="authToken" :title="syncTitle"></span>
       </div>
       <div class="theme-picker-wrap">
-        <button class="theme-btn" @click="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题色"></button>
-        <div class="theme-dropdown" v-if="showThemePicker">
-          <div v-for="t in themeColors" :key="t.value"
-               class="theme-opt" :class="{active: themeColor===t.value}"
-               :style="{background: t.value}" @click="setTheme(t.value)"
-               :title="t.label"></div>
+        <button class="theme-btn" @click="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题"></button>
+        <div class="theme-dropdown" v-if="showThemePicker" @click.stop>
+          <div class="theme-section-label">背景氛围</div>
+          <div class="theme-bg-grid">
+            <div v-for="b in bgThemes" :key="b.value"
+                 class="theme-bg-opt" :class="{active: bgTheme===b.value}"
+                 :data-v="b.value" @click="setBgTheme(b.value)"
+                 :title="b.label"><span style="position:relative;z-index:1">{{b.emoji}}</span></div>
+          </div>
+          <div class="theme-section-label">强调色</div>
+          <div class="theme-color-grid">
+            <div v-for="t in themeColors" :key="t.value"
+                 class="theme-opt" :class="{active: themeColor===t.value}"
+                 :style="{background: t.value}" @click="setTheme(t.value)"
+                 :title="t.label"></div>
+          </div>
         </div>
       </div>
     </div>
