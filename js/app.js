@@ -925,7 +925,7 @@ const app = createApp({
     // ─── Auth & Cloud Sync ───
     const TL_API = localStorage.getItem('lp_api') || 'https://api.pindou.top';
     const authToken = ref(localStorage.getItem('lp_token') || '');
-    const authPhone = ref(localStorage.getItem('lp_phone') || '');
+    const authEmail = ref(localStorage.getItem('lp_email') || '');
     const authPassword = ref('');
     const authMode = ref('login');
     const authError = ref('');
@@ -949,9 +949,9 @@ const app = createApp({
 
     async function doAuth() {
       authError.value = '';
-      const phone = authPhone.value.trim();
+      const email = authEmail.value.trim().toLowerCase();
       const password = authPassword.value;
-      if (!phone || phone.length < 6) { authError.value = '请输入有效的手机号'; return; }
+      if (!email || !email.includes('@')) { authError.value = '请输入有效的邮箱地址'; return; }
       if (!password || password.length < 6) { authError.value = '密码至少6位'; return; }
       authLoading.value = true;
       try {
@@ -959,13 +959,13 @@ const app = createApp({
         const resp = await fetch(TL_API + endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, password, nickname: profile.value?.nickname || '' }),
+          body: JSON.stringify({ email, password, nickname: profile.value?.nickname || '' }),
         });
         const data = await resp.json();
         if (!resp.ok) { authError.value = data.error || '操作失败'; return; }
         authToken.value = data.token;
         localStorage.setItem('lp_token', data.token);
-        localStorage.setItem('lp_phone', phone);
+        localStorage.setItem('lp_email', email);
         showAuthModal.value = false;
         authPassword.value = '';
         await cloudSync('upload');
@@ -979,8 +979,8 @@ const app = createApp({
     function doLogout() {
       authToken.value = '';
       localStorage.removeItem('lp_token');
-      localStorage.removeItem('lp_phone');
-      authPhone.value = '';
+      localStorage.removeItem('lp_email');
+      authEmail.value = '';
       syncStatus.value = 'idle';
       showAccountPanel.value = false;
     }
@@ -1082,7 +1082,7 @@ const app = createApp({
       aiReviewResult, aiReviewLoading,
       getHotActivities, getSuggestPlaces, getTransport, getLifeReview,
       // Auth & Sync
-      authToken, authPhone, authPassword, authMode, authError, authLoading,
+      authToken, authEmail, authPassword, authMode, authError, authLoading,
       showAuthModal, showAccountPanel, syncStatus, syncTitle,
       onProfileClick, doAuth, doLogout, cloudSync,
     };

@@ -518,8 +518,8 @@
         <button class="modal-close" @click="showAuthModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">手机号</label>
-        <input type="tel" class="form-input" v-model="authPhone" placeholder="输入手机号" maxlength="20">
+        <label class="form-label">邮箱</label>
+        <input type="email" class="form-input" v-model="authEmail" placeholder="输入邮箱地址" maxlength="120">
       </div>
       <div class="form-group">
         <label class="form-label">密码</label>
@@ -546,7 +546,7 @@
       <div class="account-info">
         <div class="account-avatar">{{profile.avatar}}</div>
         <div class="account-name">{{profile.nickname}}</div>
-        <div class="account-phone" v-if="authPhone">📱 {{authPhone}}</div>
+        <div class="account-phone" v-if="authEmail">✉️ {{authEmail}}</div>
       </div>
       <div class="account-sync">
         <div class="account-sync-status">
