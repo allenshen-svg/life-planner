@@ -92,7 +92,7 @@
       <!-- Daily famous quote -->
       <div class="quote-daily">
         <div class="quote-text">「{{dailyQuote.text}}」</div>
-        <div class="quote-author">—— {{dailyQuote.author}}</div>
+        <span class="quote-refresh" @click="refreshQuote" title="换一句">🔄</span>
       </div>
       <!-- Add motto button if none -->
       <div class="quote-add" v-if="!userMotto && !editingMotto" @click="startEditMotto">

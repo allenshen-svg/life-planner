@@ -400,6 +400,11 @@ const app = createApp({
       return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
     }
     const dailyQuote = ref(getTodayQuote());
+    function refreshQuote() {
+      let next;
+      do { next = DAILY_QUOTES[Math.floor(Math.random() * DAILY_QUOTES.length)]; } while (next.text === dailyQuote.value.text && DAILY_QUOTES.length > 1);
+      dailyQuote.value = next;
+    }
     const userMotto = ref(localStorage.getItem('lp_motto') || '');
     const editingMotto = ref(false);
     const mottoInput = ref('');
@@ -844,7 +849,7 @@ const app = createApp({
       avatars: AVATARS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
       hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand, hotDetail, openHotDetail, closeHotDetail,
-      dailyQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
+      dailyQuote, refreshQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
