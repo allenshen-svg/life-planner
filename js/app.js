@@ -317,8 +317,6 @@ const HOT_EVENTS = {
     { title: '周末读书会', tag: '学习', icon: '📚', heat: 72, date: '周末', loc: '本地书店',
       addr: '本地书店/图书馆', docs: '无', route: '搜索本地读书会', tips: '很多城市有免费公益读书会' },
   ],
-      addr: '附近公园', docs: '无', route: '步行/骑车', tips: '早上7:30集合，全程约5公里' },
-  ],
 };
 
 function formatDate(offset) {
