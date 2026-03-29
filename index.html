@@ -285,6 +285,16 @@
       </div>
       <div class="form-group">
         <label class="form-label">做什么</label>
+        <!-- Quick action sub-activities -->
+        <div v-if="quickActionSubs" style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{quickActionSubs.emoji}} {{quickActionSubs.title}} · 选择具体活动</div>
+          <div class="act-chips">
+            <span v-for="s in quickActionSubs.items" :key="s"
+                  class="act-chip" :class="{active: planForm.title===s}"
+                  @click="selectActivity(s)">{{s}}</span>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text3);cursor:pointer" @click="quickActionSubs=null">或 浏览全部活动 ↓</div>
+        </div>
         <!-- Search input -->
         <div class="dropdown-wrap" style="margin-bottom:10px">
           <input type="text" class="form-input" v-model="activityQuery"
@@ -301,13 +311,13 @@
           </div>
         </div>
         <!-- Category tabs -->
-        <div class="act-tabs">
+        <div class="act-tabs" v-if="!quickActionSubs">
           <span v-for="(g,i) in ACTIVITY_GROUPS" :key="g.label"
                 class="act-tab" :class="{active: activityTab===i}"
                 @click="activityTab=i">{{g.label}}</span>
         </div>
         <!-- Activity chips -->
-        <div class="act-chips">
+        <div class="act-chips" v-if="!quickActionSubs">
           <span v-for="a in ACTIVITY_GROUPS[activityTab].items" :key="a"
                 class="act-chip" :class="{active: planForm.title===a}"
                 @click="selectActivity(a)">{{a}}</span>

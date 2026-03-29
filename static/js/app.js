@@ -151,18 +151,20 @@ const app = createApp({
 
     // ─── Quick Action Cards ───
     const QUICK_ACTIONS = [
-      { emoji: '📈', title: '今日投资计划', cat: 'work' },
-      { emoji: '🏃', title: '跑步', cat: 'exercise' },
-      { emoji: '💪', title: '健身', cat: 'exercise' },
-      { emoji: '📚', title: '读书学习', cat: 'work' },
-      { emoji: '🍜', title: '约饭', cat: 'food' },
-      { emoji: '☕', title: '喝咖啡', cat: 'food' },
-      { emoji: '🎬', title: '看电影', cat: 'other' },
-      { emoji: '🧘', title: '瑜伽冥想', cat: 'exercise' },
+      { emoji: '📈', title: '今日投资计划', cat: 'work', subs: ['看盘复盘','研究个股','调整仓位','学习财报','定投基金','记录交易笔记','阅读研报','模拟交易'] },
+      { emoji: '🏃', title: '跑步', cat: 'exercise', subs: ['晨跑3公里','夜跑5公里','公园慢跑','操场间歇跑','跑步机','马拉松训练','跑后拉伸','跑步打卡'] },
+      { emoji: '💪', title: '健身', cat: 'exercise', subs: ['胸肌训练','背部训练','腿部训练','核心训练','手臂训练','HIIT燃脂','拉伸放松','有氧运动'] },
+      { emoji: '📚', title: '读书学习', cat: 'work', subs: ['读书1小时','背单词','刷题','看网课','写笔记','练习编程','考证复习','听播客'] },
+      { emoji: '🍜', title: '约饭', cat: 'food', subs: ['火锅','烧烤','日料','东南亚菜','西餐','川菜','粤菜','韩餐','自助餐','小龙虾','下午茶','深夜食堂'] },
+      { emoji: '☕', title: '喝咖啡', cat: 'food', subs: ['美式咖啡','拿铁','手冲咖啡','探店打卡','咖啡+读书','咖啡+办公','约人喝咖啡','尝试新品'] },
+      { emoji: '🎬', title: '看电影', cat: 'other', subs: ['院线新片','经典老片','纪录片','动画电影','漫威/DC','文艺片','恐怖片','喜剧片','情侣约片','朋友观影'] },
+      { emoji: '🧘', title: '瑜伽冥想', cat: 'exercise', subs: ['晨间冥想','睡前冥想','瑜伽30分钟','拉伸瑜伽','流瑜伽','阴瑜伽','呼吸练习','正念训练'] },
     ];
+    const quickActionSubs = ref(null); // current sub-activities from quick action
     function quickAdd(action) {
-      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: action.title, category: action.cat };
-      activityQuery.value = action.title;
+      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: '', category: action.cat };
+      activityQuery.value = '';
+      quickActionSubs.value = { emoji: action.emoji, title: action.title, items: action.subs };
       editingPlan.value = null;
       showPlanModal.value = true;
     }
@@ -455,7 +457,7 @@ const app = createApp({
 
     // When switching to plan tab, open modal with city prefilled
     watch(showPlanModal, v => {
-      if (v && !editingPlan.value) {
+      if (v && !editingPlan.value && !quickActionSubs.value) {
         planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value };
         activityQuery.value = '';
         addressQuery.value = '';
@@ -463,6 +465,7 @@ const app = createApp({
         showAddressDropdown.value = false;
         addressSuggestions.value = [];
       }
+      if (!v) quickActionSubs.value = null; // reset on close
     });
 
     return {
@@ -470,7 +473,7 @@ const app = createApp({
       showOnboarding, onboardStep, obNickname, obAvatar, obAge,
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
-      quickActions: QUICK_ACTIONS, quickAdd,
+      quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
