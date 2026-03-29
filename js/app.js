@@ -161,6 +161,28 @@ const app = createApp({
       { emoji: '🧘', title: '瑜伽冥想', cat: 'exercise', subs: ['晨间冥想','睡前冥想','瑜伽30分钟','拉伸瑜伽','流瑜伽','阴瑜伽','呼吸练习','正念训练'] },
     ];
     const quickActionSubs = ref(null); // current sub-activities from quick action
+
+    // Map activity names to sub-activities for drill-down
+    const ACTIVITY_SUBS = {
+      '吃火锅': ['重庆老火锅','潮汕牛肉锅','铜锅涮肉','椰子鸡','番茄锅','菌汤锅','自助火锅','海底捞'],
+      '吃烧烤': ['东北烧烤','日式烧鸟','韩式烤肉','大排档烧烤','自助烤肉','露天BBQ'],
+      '吃日料': ['寿司','拉面','居酒屋','刺身','天妇罗','烤鳗鱼','日式烤肉','omakase'],
+      '吃西餐': ['意大利面','牛排','法餐','披萨','汉堡','brunch','西班牙菜','墨西哥菜'],
+      '吃川菜': ['水煮鱼','麻辣香锅','串串香','冒菜','钵钵鸡','夫妻肺片','回锅肉'],
+      '吃粤菜': ['早茶','烧腊','煲仔饭','白切鸡','肠粉','虾饺','叉烧'],
+      '喝下午茶': ['英式下午茶','甜品店','蛋糕','奶茶','冰淇淋','探店打卡'],
+      '看电影': ['院线新片','经典老片','纪录片','动画电影','漫威/DC','文艺片','恐怖片','喜剧片'],
+      '逛展览': ['美术展','摄影展','当代艺术','科技展','设计展','沉浸式体验','画廊'],
+      '跑步': ['晨跑3公里','夜跑5公里','公园慢跑','操场间歇跑','跑步机','马拉松训练'],
+      '健身': ['胸肌训练','背部训练','腿部训练','核心训练','HIIT燃脂','拉伸放松','有氧运动'],
+      '游泳': ['自由泳','蛙泳','仰泳','蝶泳','水中健身','游泳打卡'],
+      '爬山': ['近郊徒步','城市绿道','登山步道','夜爬','周末远足'],
+      '逛公园': ['散步','野餐','放风筝','拍照','晒太阳','看花'],
+      '露营': ['帐篷露营','车顶露营','烧烤露营','星空露营','湖边露营'],
+      '喝咖啡': ['美式咖啡','拿铁','手冲咖啡','探店打卡','咖啡+读书','咖啡+办公'],
+      '朋友聚餐': ['火锅局','烧烤局','KTV','桌游','剧本杀','密室逃脱','轰趴'],
+    };
+
     function quickAdd(action) {
       planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: '', category: action.cat };
       activityQuery.value = '';
@@ -179,6 +201,17 @@ const app = createApp({
       return ACTIVITIES.filter(a => a.includes(q));
     });
     function selectActivity(a) {
+      // If this activity has sub-activities, show drill-down
+      if (ACTIVITY_SUBS[a] && !quickActionSubs.value) {
+        quickActionSubs.value = { emoji: '', title: a, items: ACTIVITY_SUBS[a] };
+        planForm.value.category = 'other';
+        // auto-set category
+        const catMap = { '吃':'food','喝':'food','探店':'food','逛商':'shopping','逛超':'shopping','逛市':'shopping','买':'shopping','逛书':'shopping','逛花':'shopping','看电':'other','逛展':'other','看演':'other','听':'other','看话':'other','逛博':'other','逛美':'other','看脱':'other','唱':'other','密室':'other','剧本':'other','跑步':'exercise','健身':'exercise','游泳':'exercise','打':'exercise','骑行':'exercise','爬山':'exercise','瑜伽':'exercise','滑板':'exercise','攀岩':'exercise','飞盘':'exercise','逛公':'other','野餐':'travel','露营':'travel','钓鱼':'other','遛狗':'other','散步':'exercise','朋友':'social','家庭':'social','约会':'social','见客':'work','团建':'social','轰趴':'social','上课':'work','自习':'work','开会':'work','面试':'work','写代':'work','坐':'travel','自驾':'travel','逛景':'travel','泡温':'travel','住民':'travel' };
+        for (const [prefix, cat] of Object.entries(catMap)) {
+          if (a.startsWith(prefix)) { planForm.value.category = cat; break; }
+        }
+        return;
+      }
       planForm.value.title = a;
       activityQuery.value = a;
       showActivityDropdown.value = false;
