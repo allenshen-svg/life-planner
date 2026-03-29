@@ -279,6 +279,21 @@ const app = createApp({
       await loadPlans();
     }
 
+    // ─── Complete / Reward ───
+    function toggleDone(id) {
+      const all = lsLoad('lp_plans');
+      const p = all.find(x => x.id === id);
+      if (p) { p.done = !p.done; lsSave('lp_plans', all); plans.value = all; }
+    }
+    const dayReward = computed(() => {
+      const dayPlans = plans.value.filter(p => p.date === planDate.value);
+      const total = dayPlans.length;
+      const done = dayPlans.filter(p => p.done).length;
+      const stars = done >= 5 ? 3 : done >= 3 ? 2 : done >= 1 ? 1 : 0;
+      const titles = ['还没开始哦', '初露锋芒 ✨', '势不可挡 🔥', '超级达人 🏆'];
+      return { total, done, stars, title: titles[stars] };
+    });
+
     // ─── Share ───
     async function sharePlan(p) {
       const text = `📌 ${p.date} ${p.time_start}-${p.time_end}\n${p.title}${p.location ? ' @ ' + p.location : ''}${p.city ? ' · ' + p.city : ''}\n\n— 来自「时光记」`;
@@ -460,7 +475,7 @@ const app = createApp({
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
       showPlanModal, editingPlan, planForm,
-      savePlan, editPlan, deletePlan, sharePlan,
+      savePlan, editPlan, deletePlan, sharePlan, toggleDone, dayReward,
       // Activity selector
       activityQuery, activityTab, showActivityDropdown, filteredActivities, selectActivity,
       ACTIVITY_GROUPS, ACTIVITIES, CITIES,

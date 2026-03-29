@@ -127,14 +127,29 @@
         <div class="ai-loading" v-else><div class="spinner"></div><p>正在获取推荐...</p></div>
       </div>
 
+      <!-- Reward Banner -->
+      <div class="reward-banner" v-if="dayReward.total">
+        <div class="reward-stars">
+          <span v-for="n in 3" :key="n" class="reward-star" :class="{earned: n<=dayReward.stars}">⭐</span>
+        </div>
+        <div class="reward-info">
+          <div class="reward-title">{{dayReward.title}}</div>
+          <div class="reward-progress">{{dayReward.done}} / {{dayReward.total}} 已完成</div>
+        </div>
+        <div class="reward-bar-track">
+          <div class="reward-bar-fill" :style="{width: (dayReward.total?dayReward.done/dayReward.total*100:0)+'%'}"></div>
+        </div>
+      </div>
+
       <!-- Plan List -->
       <div v-if="filteredPlans.length">
         <div v-for="p in filteredPlans" :key="p.id"
-             class="plan-item" :class="'cat-'+p.category">
+             class="plan-item" :class="['cat-'+p.category, {done: p.done}]">
           <div class="plan-time">{{p.time_start}} — {{p.time_end}}</div>
           <div class="plan-title">{{p.title}}</div>
           <div class="plan-location" v-if="p.location">{{p.location}}</div>
           <div class="plan-actions">
+            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id)" title="完成">{{p.done ? '✅' : '⬜'}}</button>
             <button @click="sharePlan(p)" title="分享">↗</button>
             <button @click="editPlan(p)" title="编辑">✎</button>
             <button @click="deletePlan(p.id)" title="删除">×</button>
