@@ -136,23 +136,6 @@
         </div>
       </div>
 
-      <!-- AI Suggestions -->
-      <div class="card" v-if="planCity">
-        <div class="card-title">智能推荐</div>
-        <div class="btn-group">
-          <button class="btn btn-outline btn-sm" @click="getHotActivities">热门活动</button>
-          <button class="btn btn-outline btn-sm" @click="getSuggestPlaces('food')">美食推荐</button>
-          <button class="btn btn-outline btn-sm" @click="getSuggestPlaces('fun')">好玩推荐</button>
-        </div>
-      </div>
-
-      <!-- AI Result -->
-      <div class="ai-panel" v-if="aiPlanResult">
-        <div class="ai-title">AI 推荐</div>
-        <div class="ai-result" v-if="!aiPlanLoading">{{aiPlanResult}}</div>
-        <div class="ai-loading" v-else><div class="spinner"></div><p>正在获取推荐...</p></div>
-      </div>
-
       <!-- Reward Banner -->
       <div class="reward-banner" v-if="dayReward.total">
         <div class="reward-stars">
