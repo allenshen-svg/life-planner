@@ -110,6 +110,26 @@
         </button>
       </div>
 
+      <!-- Hot Events -->
+      <div class="card" v-if="hotEvents.length">
+        <div class="card-title">🔥 {{planCity}} 热门活动</div>
+        <div class="hot-events">
+          <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="addHotEvent(ev)">
+            <div class="hot-event-left">
+              <span class="hot-event-icon">{{ev.icon}}</span>
+              <div class="hot-event-info">
+                <div class="hot-event-title">{{ev.title}}</div>
+                <div class="hot-event-meta">{{ev.date}} · {{ev.loc}}</div>
+              </div>
+            </div>
+            <div class="hot-event-right">
+              <span class="hot-tag">{{ev.tag}}</span>
+              <div class="heat-bar"><div class="heat-fill" :style="{width: ev.heat+'%'}"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- AI Suggestions -->
       <div class="card" v-if="planCity">
         <div class="card-title">智能推荐</div>

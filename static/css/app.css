@@ -90,6 +90,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .done-btn{font-size:16px;transition:transform .2s}
 .done-btn.checked{animation:starPop .3s ease}
 
+/* Hot Events */
+.hot-events{display:flex;flex-direction:column;gap:10px}
+.hot-event{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;gap:10px}
+.hot-event:hover{background:var(--warm);transform:translateX(2px)}
+.hot-event:active{transform:scale(.98)}
+.hot-event-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.hot-event-icon{font-size:24px;flex-shrink:0}
+.hot-event-info{min-width:0}
+.hot-event-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hot-event-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.hot-event-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.hot-tag{font-size:10px;padding:2px 8px;border-radius:var(--r-pill);background:var(--warm);color:var(--text2);font-weight:600;white-space:nowrap}
+.heat-bar{width:48px;height:4px;background:var(--warm);border-radius:2px;overflow:hidden}
+.heat-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--rose));transition:width .5s ease}
+
 /* Plan Items */
 .plan-item{background:var(--surface);border-radius:var(--r);padding:18px 20px;margin-bottom:12px;position:relative;transition:all .25s;box-shadow:var(--shadow-sm);overflow:hidden}
 .plan-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}

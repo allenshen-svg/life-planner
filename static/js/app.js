@@ -84,6 +84,74 @@ function toLocalDate(d) {
 
 function today() { return toLocalDate(new Date()); }
 
+// ─── Hot Events Database (by city, sorted by heat) ───
+const HOT_EVENTS = {
+  '上海': [
+    { title: 'ChinaJoy 2026 游戏展', tag: '展会', icon: '🎮', heat: 98, date: '4月', loc: '浦东新国际博览中心' },
+    { title: '上海国际电影节', tag: '文化', icon: '🎬', heat: 95, date: '6月', loc: '上海大剧院' },
+    { title: 'Apple WWDC 线下观影', tag: '科技', icon: '🍎', heat: 92, date: '6月', loc: '静安嘉里中心' },
+    { title: '草莓音乐节', tag: '演唱会', icon: '🎵', heat: 90, date: '5月', loc: '浦东世博公园' },
+    { title: '上海马拉松报名开启', tag: '运动', icon: '🏃', heat: 88, date: '11月', loc: '外滩' },
+    { title: 'Google I/O Extended', tag: '科技', icon: '💻', heat: 85, date: '5月', loc: '张江科学城' },
+    { title: '上海书展', tag: '学习', icon: '📚', heat: 82, date: '8月', loc: '上海展览中心' },
+    { title: 'NBA 中国赛', tag: '球赛', icon: '🏀', heat: 80, date: '10月', loc: '梅赛德斯奔驰文化中心' },
+    { title: 'WeWork 创业者之夜', tag: '社交', icon: '🤝', heat: 75, date: '每月', loc: '南京西路' },
+    { title: '周末公益跑团', tag: '运动', icon: '👟', heat: 70, date: '每周六', loc: '世纪公园' },
+  ],
+  '北京': [
+    { title: 'GMIC 全球移动互联网大会', tag: '科技', icon: '🌐', heat: 96, date: '4月', loc: '国家会议中心' },
+    { title: '北京国际电影节', tag: '文化', icon: '🎬', heat: 94, date: '4月', loc: '中国电影博物馆' },
+    { title: '字节跳动技术沙龙', tag: '科技', icon: '💡', heat: 90, date: '每月', loc: '海淀区' },
+    { title: '国安主场比赛', tag: '球赛', icon: '⚽', heat: 88, date: '周末', loc: '工人体育场' },
+    { title: '798 新媒体艺术展', tag: '展会', icon: '🎨', heat: 85, date: '全年', loc: '798艺术区' },
+    { title: '五棵松 演唱会季', tag: '演唱会', icon: '🎤', heat: 83, date: '5-8月', loc: '五棵松体育馆' },
+    { title: '清华创业论坛', tag: '学习', icon: '🎓', heat: 78, date: '5月', loc: '清华大学' },
+    { title: '故宫夜场特展', tag: '文化', icon: '🏛️', heat: 76, date: '春季', loc: '故宫博物院' },
+  ],
+  '广州': [
+    { title: '广交会', tag: '展会', icon: '🏢', heat: 95, date: '4月/10月', loc: '琶洲展馆' },
+    { title: '广州恒大主场', tag: '球赛', icon: '⚽', heat: 88, date: '周末', loc: '天河体育场' },
+    { title: '小蛮腰科技大会', tag: '科技', icon: '🗼', heat: 85, date: '5月', loc: '广州塔' },
+    { title: '广州爵士音乐节', tag: '演唱会', icon: '🎷', heat: 80, date: '11月', loc: '二沙岛' },
+    { title: 'TEDx 广州', tag: '学习', icon: '💡', heat: 78, date: '6月', loc: '天河区' },
+    { title: '珠江夜跑团', tag: '运动', icon: '🏃', heat: 72, date: '每周', loc: '珠江边' },
+  ],
+  '深圳': [
+    { title: '腾讯全球数字生态大会', tag: '科技', icon: '🐧', heat: 96, date: '6月', loc: '深圳会展中心' },
+    { title: 'Maker Faire 深圳', tag: '科技', icon: '🔧', heat: 90, date: '10月', loc: '南山区' },
+    { title: '深圳南山半程马拉松', tag: '运动', icon: '🏃', heat: 85, date: '3月', loc: '南山区' },
+    { title: '华强北电子展', tag: '展会', icon: '📱', heat: 82, date: '全年', loc: '华强北' },
+    { title: '深圳湾公园音乐会', tag: '演唱会', icon: '🎵', heat: 78, date: '周末', loc: '深圳湾' },
+    { title: '前海创投路演', tag: '社交', icon: '💰', heat: 75, date: '每月', loc: '前海' },
+  ],
+  '杭州': [
+    { title: '云栖大会', tag: '科技', icon: '☁️', heat: 97, date: '9月', loc: '云栖小镇' },
+    { title: '杭州马拉松', tag: '运动', icon: '🏃', heat: 88, date: '11月', loc: '西湖' },
+    { title: '西湖音乐节', tag: '演唱会', icon: '🎵', heat: 85, date: '5月', loc: '太子湾' },
+    { title: '中国国际动漫节', tag: '展会', icon: '🎌', heat: 82, date: '4月', loc: '白马湖' },
+    { title: 'GDG DevFest', tag: '科技', icon: '🧑‍💻', heat: 80, date: '11月', loc: '滨江区' },
+    { title: '宋城千古情', tag: '文化', icon: '🏯', heat: 75, date: '全年', loc: '宋城' },
+  ],
+  '成都': [
+    { title: '成都大运会系列活动', tag: '运动', icon: '🏅', heat: 92, date: '全年', loc: '东安湖' },
+    { title: '成都国际车展', tag: '展会', icon: '🚗', heat: 88, date: '8月', loc: '西博城' },
+    { title: '春糖全国糖酒会', tag: '展会', icon: '🍷', heat: 85, date: '3月', loc: '西博城' },
+    { title: '草莓音乐节成都站', tag: '演唱会', icon: '🍓', heat: 82, date: '5月', loc: '蔚然花海' },
+    { title: '太古里创意市集', tag: '社交', icon: '🛍️', heat: 78, date: '周末', loc: '太古里' },
+    { title: '成都读书会', tag: '学习', icon: '📖', heat: 70, date: '每周', loc: '方所书店' },
+  ],
+  '_default': [
+    { title: 'Apple WWDC 2026 线上直播', tag: '科技', icon: '🍎', heat: 95, date: '6月', loc: '线上' },
+    { title: 'Google I/O 2026', tag: '科技', icon: '🤖', heat: 93, date: '5月', loc: '线上' },
+    { title: '全民健身日', tag: '运动', icon: '🏃', heat: 85, date: '8月8日', loc: '全国' },
+    { title: '双十一预售攻略', tag: '购物', icon: '🛒', heat: 90, date: '10月', loc: '线上' },
+    { title: '小红书热门打卡地', tag: '社交', icon: '📕', heat: 82, date: '实时', loc: '本地' },
+    { title: '本周热映电影TOP5', tag: '文化', icon: '🎬', heat: 80, date: '本周', loc: '附近影院' },
+    { title: '周末读书会', tag: '学习', icon: '📚', heat: 72, date: '周末', loc: '本地书店' },
+    { title: '社区公益跑', tag: '运动', icon: '👟', heat: 68, date: '周六', loc: '附近公园' },
+  ],
+};
+
 function formatDate(offset) {
   const d = new Date();
   d.setDate(d.getDate() + offset);
@@ -488,6 +556,20 @@ const app = createApp({
       loadDiary();
     });
 
+    // ─── Hot Events ───
+    const hotEvents = computed(() => {
+      const city = planCity.value;
+      const events = HOT_EVENTS[city] || HOT_EVENTS['_default'];
+      return events.sort((a, b) => b.heat - a.heat);
+    });
+    function addHotEvent(ev) {
+      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: ev.title, category: 'other', location: ev.loc, notes: `${ev.tag} · ${ev.date}` };
+      activityQuery.value = ev.title;
+      editingPlan.value = null;
+      quickActionSubs.value = null;
+      showPlanModal.value = true;
+    }
+
     // When switching to plan tab, open modal with city prefilled
     watch(showPlanModal, v => {
       if (v && !editingPlan.value && !quickActionSubs.value) {
@@ -507,6 +589,7 @@ const app = createApp({
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
+      hotEvents, addHotEvent,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
