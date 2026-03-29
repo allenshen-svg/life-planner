@@ -149,6 +149,24 @@ const app = createApp({
       return { date: today(), time_start: t, time_end: plusHours(t, 2), title: '', location: '', city: planCity.value, category: 'other', notes: '' };
     }
 
+    // ─── Quick Action Cards ───
+    const QUICK_ACTIONS = [
+      { emoji: '📈', title: '今日投资计划', cat: 'work' },
+      { emoji: '🏃', title: '跑步', cat: 'exercise' },
+      { emoji: '💪', title: '健身', cat: 'exercise' },
+      { emoji: '📚', title: '读书学习', cat: 'work' },
+      { emoji: '🍜', title: '约饭', cat: 'food' },
+      { emoji: '☕', title: '喝咖啡', cat: 'food' },
+      { emoji: '🎬', title: '看电影', cat: 'other' },
+      { emoji: '🧘', title: '瑜伽冥想', cat: 'exercise' },
+    ];
+    function quickAdd(action) {
+      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: action.title, category: action.cat };
+      activityQuery.value = action.title;
+      editingPlan.value = null;
+      showPlanModal.value = true;
+    }
+
     // ─── Activity search ───
     const activityQuery = ref('');
     const activityTab = ref(0); // index into ACTIVITY_GROUPS
@@ -437,6 +455,7 @@ const app = createApp({
       showOnboarding, onboardStep, obNickname, obAvatar, obAge,
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
+      quickActions: QUICK_ACTIONS, quickAdd,
       tab, aiProvider,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,

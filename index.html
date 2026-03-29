@@ -95,10 +95,18 @@
         </div>
       </div>
 
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="quick-card" v-for="qa in quickActions" :key="qa.title" @click="quickAdd(qa)">
+          <span class="quick-emoji">{{qa.emoji}}</span>
+          <span class="quick-label">{{qa.title}}</span>
+        </div>
+      </div>
+
       <!-- Add Plan Button -->
       <div style="margin-bottom:14px">
         <button class="btn btn-primary btn-block" @click="showPlanModal=true">
-          + 添加计划
+          + 自定义计划
         </button>
       </div>
 

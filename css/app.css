@@ -64,6 +64,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .date-quick-item .day-name{display:block;font-size:10px;font-weight:500;opacity:0.6;margin-bottom:4px;letter-spacing:0.5px}
 .date-quick-item.active{background:var(--text);color:var(--bg);box-shadow:var(--shadow)}
 
+/* Quick Action Cards */
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.quick-card{background:var(--surface);border-radius:var(--r);padding:16px 8px;text-align:center;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;align-items:center;gap:6px}
+.quick-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.quick-card:active{transform:scale(.95)}
+.quick-emoji{font-size:28px;line-height:1}
+.quick-label{font-size:11px;font-weight:600;color:var(--text2);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
 /* Plan Items */
 .plan-item{background:var(--surface);border-radius:var(--r);padding:18px 20px;margin-bottom:12px;position:relative;transition:all .25s;box-shadow:var(--shadow-sm);overflow:hidden}
 .plan-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
