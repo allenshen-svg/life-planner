@@ -633,17 +633,21 @@ const app = createApp({
     const hotDetail = ref(null); // currently viewed event detail
     function openHotDetail(ev) { hotDetail.value = ev; }
     function closeHotDetail() { hotDetail.value = null; }
+    let _fromHotEvent = false;
     function addHotEvent(ev) {
-      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: ev.title, category: 'other', location: ev.loc, notes: `${ev.tag} · ${ev.date}` };
+      const notes = [`${ev.tag} · ${ev.date}`, ev.addr ? `地址: ${ev.addr}` : '', ev.route ? `交通: ${ev.route}` : '', ev.docs ? `证件: ${ev.docs}` : '', ev.tips ? `提示: ${ev.tips}` : ''].filter(Boolean).join('\n');
+      planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: ev.title, category: 'other', location: ev.loc || ev.addr || '', notes };
       activityQuery.value = ev.title;
+      addressQuery.value = ev.addr || ev.loc || '';
       editingPlan.value = null;
       quickActionSubs.value = null;
+      _fromHotEvent = true;
       showPlanModal.value = true;
     }
 
     // When switching to plan tab, open modal with city prefilled
     watch(showPlanModal, v => {
-      if (v && !editingPlan.value && !quickActionSubs.value) {
+      if (v && !editingPlan.value && !quickActionSubs.value && !_fromHotEvent) {
         planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value };
         activityQuery.value = '';
         addressQuery.value = '';
@@ -651,6 +655,7 @@ const app = createApp({
         showAddressDropdown.value = false;
         addressSuggestions.value = [];
       }
+      _fromHotEvent = false;
       if (!v) quickActionSubs.value = null; // reset on close
     });
 
