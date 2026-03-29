@@ -117,7 +117,7 @@
           <span v-for="c in hotCategories" :key="c" class="hot-cat-tab" :class="{active: hotCategory===c}" @click="hotCategory=c">{{c}}</span>
         </div>
         <div class="hot-events">
-          <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="addHotEvent(ev)">
+          <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="openHotDetail(ev)">
             <div class="hot-event-left">
               <span class="hot-event-icon">{{ev.icon}}</span>
               <div class="hot-event-info">
@@ -394,6 +394,44 @@
       <button class="btn btn-primary btn-block" @click="savePlan">
         {{editingPlan ? '保存修改' : '添加计划'}}
       </button>
+    </div>
+  </div>
+
+  <!-- ═══ Hot Event Detail Modal ═══ -->
+  <div class="modal-overlay" v-if="hotDetail" @click.self="closeHotDetail">
+    <div class="modal-content hot-detail-modal">
+      <div class="modal-header">
+        <h3>{{hotDetail.icon}} {{hotDetail.title}}</h3>
+        <button class="modal-close" @click="closeHotDetail">×</button>
+      </div>
+      <div class="hot-detail-tag"><span class="hot-tag">{{hotDetail.tag}}</span><span class="hot-detail-heat">🔥 {{hotDetail.heat}}</span></div>
+      <div class="hot-detail-items">
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">📅 时间</span>
+          <span class="hot-detail-val">{{hotDetail.date}}</span>
+        </div>
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">📍 地点</span>
+          <span class="hot-detail-val">{{hotDetail.loc}}</span>
+        </div>
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">🏠 详细地址</span>
+          <span class="hot-detail-val">{{hotDetail.addr}}</span>
+        </div>
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">📋 所需证件</span>
+          <span class="hot-detail-val">{{hotDetail.docs}}</span>
+        </div>
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">🚇 交通路线</span>
+          <span class="hot-detail-val">{{hotDetail.route}}</span>
+        </div>
+        <div class="hot-detail-item">
+          <span class="hot-detail-label">💡 温馨提示</span>
+          <span class="hot-detail-val">{{hotDetail.tips}}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" @click="addHotEvent(hotDetail); closeHotDetail()">加入我的计划</button>
     </div>
   </div>
 

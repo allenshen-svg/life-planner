@@ -97,6 +97,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .hot-cat-tab:hover:not(.active){background:var(--warm)}
 .hot-expand{text-align:center;padding:10px 0 2px;font-size:12px;color:var(--text3);cursor:pointer;font-weight:500;transition:color .2s}
 .hot-expand:hover{color:var(--amber)}
+.hot-detail-modal{max-width:400px}
+.hot-detail-tag{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.hot-detail-heat{font-size:13px;color:var(--rose);font-weight:600}
+.hot-detail-items{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.hot-detail-item{display:flex;flex-direction:column;gap:3px;padding:10px 14px;background:var(--surface2);border-radius:var(--r-sm)}
+.hot-detail-label{font-size:12px;color:var(--text3);font-weight:600}
+.hot-detail-val{font-size:14px;color:var(--text1);line-height:1.5}
 .hot-events{display:flex;flex-direction:column;gap:10px}
 .hot-event{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;gap:10px}
 .hot-event:hover{background:var(--warm);transform:translateX(2px)}
