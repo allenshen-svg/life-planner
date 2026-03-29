@@ -15,7 +15,7 @@
       <template v-if="onboardStep===1">
         <div class="onboard-title">👋 你好呀</div>
         <div class="onboard-sub">欢迎来到时光记，先给自己取个名字吧</div>
-        <div class="onboard-step">STEP 1 / 3</div>
+        <div class="onboard-step">STEP 1 / 4</div>
         <input class="onboard-input" v-model="obNickname" placeholder="输入你的昵称…" maxlength="12" @keyup.enter="onboardNext">
         <div class="onboard-btns">
           <button class="btn btn-primary btn-block" @click="onboardNext" :disabled="!obNickname.trim()">下一步 →</button>
@@ -26,7 +26,7 @@
         <div class="onboard-avatar-preview">{{obAvatar}}</div>
         <div class="onboard-title">选个头像</div>
         <div class="onboard-sub">挑一个你喜欢的可爱图标</div>
-        <div class="onboard-step">STEP 2 / 3</div>
+        <div class="onboard-step">STEP 2 / 4</div>
         <div class="avatar-grid">
           <div v-for="a in avatars" :key="a" class="avatar-opt" :class="{active: obAvatar===a}" @click="obAvatar=a">{{a}}</div>
         </div>
@@ -35,12 +35,27 @@
           <button class="btn btn-primary" @click="onboardNext">下一步 →</button>
         </div>
       </template>
-      <!-- Step 3: Age (optional) -->
+      <!-- Step 3: City -->
       <template v-if="onboardStep===3">
+        <div class="onboard-avatar-preview">{{obAvatar}}</div>
+        <div class="onboard-title">你在哪座城市？</div>
+        <div class="onboard-sub">选择城市后，会为你推荐当地热门活动</div>
+        <div class="onboard-step">STEP 3 / 4</div>
+        <div class="city-grid">
+          <div v-for="c in CITIES.slice(0,20)" :key="c" class="city-opt" :class="{active: obCity===c}" @click="obCity=c">{{c}}</div>
+        </div>
+        <input class="onboard-input" v-model="obCity" placeholder="或输入你的城市…" maxlength="10" style="margin-top:10px">
+        <div class="onboard-btns">
+          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
+          <button class="btn btn-primary" @click="onboardNext">下一步 →</button>
+        </div>
+      </template>
+      <!-- Step 4: Age (optional) -->
+      <template v-if="onboardStep===4">
         <div class="onboard-avatar-preview">{{obAvatar}}</div>
         <div class="onboard-title">{{obNickname}}，最后一步</div>
         <div class="onboard-sub">你的年龄是？（可以跳过）</div>
-        <div class="onboard-step">STEP 3 / 3</div>
+        <div class="onboard-step">STEP 4 / 4</div>
         <input class="onboard-input" v-model="obAge" type="number" placeholder="年龄（选填）" min="1" max="120" @keyup.enter="onboardNext">
         <div class="onboard-btns">
           <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
@@ -57,9 +72,10 @@
       <div class="subtitle">LIFE PLANNER</div>
     </div>
     <div class="header-right">
-      <div class="profile-chip" v-if="profile">
+      <div class="profile-chip" v-if="profile" @click="onProfileClick">
         <span class="avatar-sm">{{profile.avatar}}</span>
         <span>{{profile.nickname}}</span>
+        <span class="sync-dot" :class="syncStatus" v-if="authToken" :title="syncTitle"></span>
       </div>
       <div class="theme-picker-wrap">
         <button class="theme-btn" @click="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题色"></button>
@@ -491,6 +507,64 @@
       <button class="btn btn-primary btn-block" @click="saveDiary">
         {{editingDiary ? '保存修改' : '保存日记'}}
       </button>
+    </div>
+  </div>
+
+  <!-- ═══ Auth Modal (Login / Register) ═══ -->
+  <div class="modal-overlay" v-if="showAuthModal" @click.self="showAuthModal=false">
+    <div class="modal-content auth-modal">
+      <div class="modal-header">
+        <h3>{{authMode==='login' ? '登录' : '注册'}}</h3>
+        <button class="modal-close" @click="showAuthModal=false">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">手机号</label>
+        <input type="tel" class="form-input" v-model="authPhone" placeholder="输入手机号" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">密码</label>
+        <input type="password" class="form-input" v-model="authPassword" placeholder="至少6位密码" maxlength="32">
+      </div>
+      <div class="auth-error" v-if="authError">{{authError}}</div>
+      <button class="btn btn-primary btn-block" @click="doAuth" :disabled="authLoading">
+        {{authLoading ? '请稍候…' : (authMode==='login' ? '登录' : '注册')}}
+      </button>
+      <div class="auth-switch">
+        <span v-if="authMode==='login'" @click="authMode='register'; authError=''">没有账号？<b>去注册</b></span>
+        <span v-else @click="authMode='login'; authError=''">已有账号？<b>去登录</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Account Panel ═══ -->
+  <div class="modal-overlay" v-if="showAccountPanel" @click.self="showAccountPanel=false">
+    <div class="modal-content account-panel">
+      <div class="modal-header">
+        <h3>我的账户</h3>
+        <button class="modal-close" @click="showAccountPanel=false">×</button>
+      </div>
+      <div class="account-info">
+        <div class="account-avatar">{{profile.avatar}}</div>
+        <div class="account-name">{{profile.nickname}}</div>
+        <div class="account-phone" v-if="authPhone">📱 {{authPhone}}</div>
+      </div>
+      <div class="account-sync">
+        <div class="account-sync-status">
+          <span class="sync-dot" :class="syncStatus"></span>
+          <span>{{syncTitle}}</span>
+        </div>
+        <button class="btn btn-outline btn-sm" @click="cloudSync('upload')" :disabled="syncStatus==='syncing'">
+          ☁️ 立即同步
+        </button>
+      </div>
+      <div class="account-actions">
+        <button class="btn btn-outline btn-block" @click="cloudSync('download')">
+          📥 从云端恢复数据
+        </button>
+        <button class="btn btn-block" style="color:var(--rose);margin-top:8px" @click="doLogout">
+          退出登录
+        </button>
+      </div>
     </div>
   </div>
 </div>

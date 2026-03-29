@@ -330,9 +330,10 @@ const app = createApp({
     // ─── Onboarding / Profile ───
     const profile = ref(lsObj('lp_profile'));
     const showOnboarding = ref(!profile.value);
-    const onboardStep = ref(1);  // 1=nickname, 2=avatar, 3=age
+    const onboardStep = ref(1);  // 1=nickname, 2=avatar, 3=city, 4=age
     const obNickname = ref('');
     const obAvatar = ref('🐱');
+    const obCity = ref('');
     const obAge = ref('');
 
     function onboardNext() {
@@ -341,6 +342,9 @@ const app = createApp({
         onboardStep.value = 2;
       } else if (onboardStep.value === 2) {
         onboardStep.value = 3;
+      } else if (onboardStep.value === 3) {
+        if (obCity.value) localStorage.setItem('lp_city', obCity.value);
+        onboardStep.value = 4;
       } else {
         const p = {
           nickname: obNickname.value.trim(),
@@ -348,6 +352,7 @@ const app = createApp({
           age: obAge.value ? parseInt(obAge.value) : null,
         };
         localStorage.setItem('lp_profile', JSON.stringify(p));
+        if (obCity.value) planCity.value = obCity.value;
         profile.value = p;
         showOnboarding.value = false;
       }
@@ -917,9 +922,136 @@ const app = createApp({
       if (!v) quickActionSubs.value = null; // reset on close
     });
 
+    // ─── Auth & Cloud Sync ───
+    const TL_API = localStorage.getItem('lp_api') || 'https://xiaoniqiu.top/tl';
+    const authToken = ref(localStorage.getItem('lp_token') || '');
+    const authPhone = ref(localStorage.getItem('lp_phone') || '');
+    const authPassword = ref('');
+    const authMode = ref('login');
+    const authError = ref('');
+    const authLoading = ref(false);
+    const showAuthModal = ref(false);
+    const showAccountPanel = ref(false);
+    const syncStatus = ref(authToken.value ? 'idle' : 'idle');
+    const syncTitle = computed(() => {
+      if (!authToken.value) return '未登录';
+      const m = { idle: '等待同步', syncing: '同步中…', synced: '已同步', error: '同步失败' };
+      return m[syncStatus.value] || '';
+    });
+
+    function onProfileClick() {
+      if (authToken.value) {
+        showAccountPanel.value = true;
+      } else {
+        showAuthModal.value = true;
+      }
+    }
+
+    async function doAuth() {
+      authError.value = '';
+      const phone = authPhone.value.trim();
+      const password = authPassword.value;
+      if (!phone || phone.length < 6) { authError.value = '请输入有效的手机号'; return; }
+      if (!password || password.length < 6) { authError.value = '密码至少6位'; return; }
+      authLoading.value = true;
+      try {
+        const endpoint = authMode.value === 'register' ? '/api/tl/register' : '/api/tl/login';
+        const resp = await fetch(TL_API + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password, nickname: profile.value?.nickname || '' }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) { authError.value = data.error || '操作失败'; return; }
+        authToken.value = data.token;
+        localStorage.setItem('lp_token', data.token);
+        localStorage.setItem('lp_phone', phone);
+        showAuthModal.value = false;
+        authPassword.value = '';
+        await cloudSync('upload');
+      } catch (e) {
+        authError.value = '网络错误，请检查网络连接';
+      } finally {
+        authLoading.value = false;
+      }
+    }
+
+    function doLogout() {
+      authToken.value = '';
+      localStorage.removeItem('lp_token');
+      localStorage.removeItem('lp_phone');
+      authPhone.value = '';
+      syncStatus.value = 'idle';
+      showAccountPanel.value = false;
+    }
+
+    async function cloudSync(direction) {
+      if (!authToken.value) return;
+      syncStatus.value = 'syncing';
+      try {
+        if (direction === 'upload') {
+          const body = {
+            profile: localStorage.getItem('lp_profile') || '{}',
+            plans: localStorage.getItem('lp_plans') || '[]',
+            diary: localStorage.getItem('lp_diary') || '[]',
+            motto: localStorage.getItem('lp_motto') || '',
+            city: localStorage.getItem('lp_city') || '',
+            theme: localStorage.getItem('lp_theme') || '',
+          };
+          const resp = await fetch(TL_API + '/api/tl/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken.value },
+            body: JSON.stringify(body),
+          });
+          if (!resp.ok) {
+            if (resp.status === 401) { doLogout(); return; }
+            throw new Error('sync failed');
+          }
+          syncStatus.value = 'synced';
+        } else {
+          const resp = await fetch(TL_API + '/api/tl/sync', {
+            headers: { 'Authorization': 'Bearer ' + authToken.value },
+          });
+          if (!resp.ok) {
+            if (resp.status === 401) { doLogout(); return; }
+            throw new Error('sync failed');
+          }
+          const data = await resp.json();
+          if (data.profile && data.profile !== '{}') { localStorage.setItem('lp_profile', data.profile); profile.value = JSON.parse(data.profile); }
+          if (data.plans && data.plans !== '[]') { localStorage.setItem('lp_plans', data.plans); plans.value = JSON.parse(data.plans); }
+          if (data.diary && data.diary !== '[]') { localStorage.setItem('lp_diary', data.diary); diaryEntries.value = JSON.parse(data.diary); }
+          if (data.motto) { localStorage.setItem('lp_motto', data.motto); userMotto.value = data.motto; }
+          if (data.city) { localStorage.setItem('lp_city', data.city); planCity.value = data.city; }
+          if (data.theme) { localStorage.setItem('lp_theme', data.theme); setTheme(data.theme); }
+          syncStatus.value = 'synced';
+          showAccountPanel.value = false;
+        }
+      } catch (e) {
+        syncStatus.value = 'error';
+      }
+    }
+
+    let _syncTimer = null;
+    function scheduleSync() {
+      if (!authToken.value) return;
+      clearTimeout(_syncTimer);
+      _syncTimer = setTimeout(() => cloudSync('upload'), 3000);
+    }
+    watch(plans, scheduleSync, { deep: true });
+    watch(diaryEntries, scheduleSync, { deep: true });
+    watch(userMotto, scheduleSync);
+    watch(planCity, scheduleSync);
+    watch(themeColor, scheduleSync);
+
+    onMounted(() => {
+      if (authToken.value) {
+        setTimeout(() => cloudSync('upload'), 2000);
+      }
+    });
+
     return {
       // Onboarding
-      showOnboarding, onboardStep, obNickname, obAvatar, obAge,
+      showOnboarding, onboardStep, obNickname, obAvatar, obCity, obAge,
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
@@ -949,6 +1081,10 @@ const app = createApp({
       aiTransportResult, aiTransportLoading,
       aiReviewResult, aiReviewLoading,
       getHotActivities, getSuggestPlaces, getTransport, getLifeReview,
+      // Auth & Sync
+      authToken, authPhone, authPassword, authMode, authError, authLoading,
+      showAuthModal, showAccountPanel, syncStatus, syncTitle,
+      onProfileClick, doAuth, doLogout, cloudSync,
     };
   }
 });
