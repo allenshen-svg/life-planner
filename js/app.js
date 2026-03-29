@@ -923,7 +923,7 @@ const app = createApp({
     });
 
     // ─── Auth & Cloud Sync ───
-    const TL_API = localStorage.getItem('lp_api') || 'https://xiaoniqiu.top/tl';
+    const TL_API = localStorage.getItem('lp_api') || 'https://api.pindou.top';
     const authToken = ref(localStorage.getItem('lp_token') || '');
     const authPhone = ref(localStorage.getItem('lp_phone') || '');
     const authPassword = ref('');
