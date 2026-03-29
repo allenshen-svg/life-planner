@@ -366,6 +366,31 @@ const app = createApp({
     });
     const aiProvider = ref(localStorage.getItem('lp_aiProvider') || 'deepseek');
 
+    // ─── Theme Color Picker ───
+    const themeColors = [
+      { value: '#5f7d6e', label: '墨绿' },
+      { value: '#6a9cad', label: '天蓝' },
+      { value: '#8a7ba8', label: '薰衣草' },
+      { value: '#c26e6e', label: '玫瑰' },
+      { value: '#c59a5f', label: '琥珀' },
+      { value: '#5a8f9a', label: '青碧' },
+      { value: '#b07a8a', label: '桃粉' },
+      { value: '#6b7b8d', label: '石墨' },
+    ];
+    const themeColor = ref(localStorage.getItem('lp_theme') || '#5f7d6e');
+    const showThemePicker = ref(false);
+    function setTheme(color) {
+      themeColor.value = color;
+      localStorage.setItem('lp_theme', color);
+      document.documentElement.style.setProperty('--indigo', color);
+      showThemePicker.value = false;
+    }
+    // Apply saved theme on load
+    onMounted(() => {
+      const saved = localStorage.getItem('lp_theme');
+      if (saved) document.documentElement.style.setProperty('--indigo', saved);
+    });
+
     watch(aiProvider, v => localStorage.setItem('lp_aiProvider', v));
 
     // ─── Daily Quote + User Motto ───
@@ -901,6 +926,7 @@ const app = createApp({
       hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand, hotDetail, openHotDetail, closeHotDetail,
       dailyQuote, refreshQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
       tab, tabBar, tabIndicatorStyle, aiProvider,
+      themeColors, themeColor, showThemePicker, setTheme,
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
       showPlanModal, editingPlan, planForm,

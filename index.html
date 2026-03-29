@@ -61,6 +61,15 @@
         <span class="avatar-sm">{{profile.avatar}}</span>
         <span>{{profile.nickname}}</span>
       </div>
+      <div class="theme-picker-wrap">
+        <button class="theme-btn" @click="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题色"></button>
+        <div class="theme-dropdown" v-if="showThemePicker">
+          <div v-for="t in themeColors" :key="t.value"
+               class="theme-opt" :class="{active: themeColor===t.value}"
+               :style="{background: t.value}" @click="setTheme(t.value)"
+               :title="t.label"></div>
+        </div>
+      </div>
     </div>
   </header>
 
