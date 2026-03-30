@@ -82,10 +82,10 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;-webkit-font-smo
   background:radial-gradient(ellipse at 70% 15%,var(--bg-glow1) 0%,transparent 50%),radial-gradient(ellipse at 20% 55%,var(--bg-glow2) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,var(--bg-glow3) 0%,transparent 45%),var(--bg);
   background-attachment:fixed}
 #app{display:flex;flex-direction:column;min-height:100vh}
-.main-content{flex:1;padding:0 20px 32px;max-width:480px;margin:0 auto;width:100%}
+.main-content{flex:1;padding:0 20px calc(env(safe-area-inset-bottom, 0px) + 32px);max-width:480px;margin:0 auto;width:100%}
 
 /* Header */
-.app-header{padding:28px 20px 20px;display:flex;align-items:flex-end;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);background:var(--header-bg);border-bottom:1px solid rgba(255,255,255,0.1);box-shadow:0 1px 0 rgba(255,255,255,0.05)}
+.app-header{padding:calc(env(safe-area-inset-top, 0px) + 12px) 20px 20px;display:flex;align-items:flex-end;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);background:var(--header-bg);border-bottom:1px solid rgba(255,255,255,0.1);box-shadow:0 1px 0 rgba(255,255,255,0.05)}
 .app-header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;color:var(--text)}
 .app-header .subtitle{font-size:11px;color:var(--text3);margin-top:2px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase}
 .header-right{display:flex;gap:8px;align-items:center}
