@@ -174,32 +174,6 @@
         </button>
       </div>
 
-      <!-- Hot Events -->
-      <div class="card" v-if="hotEvents.length || hotCategories.length > 1">
-        <div class="card-title">🔥 {{planCity}} 热门活动</div>
-        <div class="hot-cat-tabs">
-          <span v-for="c in hotCategories" :key="c" class="hot-cat-tab" :class="{active: hotCategory===c}" @click="hotCategory=c">{{c}}</span>
-        </div>
-        <div class="hot-events">
-          <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="openHotDetail(ev)">
-            <div class="hot-event-left">
-              <span class="hot-event-icon">{{ev.icon}}</span>
-              <div class="hot-event-info">
-                <div class="hot-event-title">{{ev.title}}</div>
-                <div class="hot-event-meta">{{ev.date}} · {{ev.loc}}</div>
-              </div>
-            </div>
-            <div class="hot-event-right">
-              <span class="hot-tag">{{ev.tag}}</span>
-              <div class="heat-bar"><div class="heat-fill" :style="{width: ev.heat+'%'}"></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="hot-expand" v-if="hotHasMore" @click="toggleHotExpand">
-          {{hotExpanded ? '收起 ▲' : '查看更多 ▼'}}
-        </div>
-      </div>
-
       <!-- Reward Banner -->
       <div class="reward-banner" v-if="dayReward.total">
         <div class="reward-stars">
@@ -239,6 +213,32 @@
       <div v-else class="empty-state">
         <div class="empty-icon">○</div>
         <p>这一天还没有计划<br>点击上方按钮添加吧</p>
+      </div>
+
+      <!-- Hot Events -->
+      <div class="card" v-if="hotEvents.length || hotCategories.length > 1">
+        <div class="card-title">🔥 {{planCity}} 热门活动</div>
+        <div class="hot-cat-tabs">
+          <span v-for="c in hotCategories" :key="c" class="hot-cat-tab" :class="{active: hotCategory===c}" @click="hotCategory=c">{{c}}</span>
+        </div>
+        <div class="hot-events">
+          <div class="hot-event" v-for="ev in hotEvents" :key="ev.title" @click="openHotDetail(ev)">
+            <div class="hot-event-left">
+              <span class="hot-event-icon">{{ev.icon}}</span>
+              <div class="hot-event-info">
+                <div class="hot-event-title">{{ev.title}}</div>
+                <div class="hot-event-meta">{{ev.date}} · {{ev.loc}}</div>
+              </div>
+            </div>
+            <div class="hot-event-right">
+              <span class="hot-tag">{{ev.tag}}</span>
+              <div class="heat-bar"><div class="heat-fill" :style="{width: ev.heat+'%'}"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="hot-expand" v-if="hotHasMore" @click="toggleHotExpand">
+          {{hotExpanded ? '收起 ▲' : '查看更多 ▼'}}
+        </div>
       </div>
 
       <!-- Transport Result -->
