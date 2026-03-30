@@ -488,10 +488,140 @@ const app = createApp({
       return String(nh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
     }
 
+    // ─── Plan Emoji & Color ───
+    const PLAN_EMOJIS = ['📝','☀️','📖','🍜','🏃','🎬','💼','🎯','🧘','🎨','🎵','✈️','🛒','💪','☕','🎮','📸','🌿','🐾','💡'];
+    const PLAN_COLORS = [
+      { name: '默认', value: '' },
+      { name: '琥珀', value: '#c59a5f' },
+      { name: '翡翠', value: '#5f8a6e' },
+      { name: '天蓝', value: '#6a9cad' },
+      { name: '玫瑰', value: '#c26e6e' },
+      { name: '紫藤', value: '#8a7ba8' },
+      { name: '珊瑚', value: '#e08870' },
+      { name: '薄荷', value: '#5fbda0' },
+    ];
+
     function emptyPlanForm() {
       const t = nowTime();
-      return { date: today(), time_start: t, time_end: plusHours(t, 2), title: '', location: '', city: planCity.value, category: 'other', notes: '' };
+      return { date: today(), time_start: t, time_end: plusHours(t, 2), title: '', location: '', city: planCity.value, category: 'other', notes: '', emoji: '', color: '', widgets: [] };
     }
+    // Widget types: 'pomodoro' | 'counter' | 'micronote'
+    const PLAN_WIDGETS = [
+      { key: 'pomodoro', icon: '🍅', label: '番茄钟', desc: '专注计时' },
+      { key: 'counter',  icon: '📊', label: '打卡计数', desc: '累计次数' },
+      { key: 'micronote',icon: '📝', label: '微日记', desc: '简短记录' },
+    ];
+
+    // ─── Plan Templates ───
+    const showTemplates = ref(false);
+    const PLAN_TEMPLATES = [
+      { id: 'morning', cover: '🌅', title: '21天早起打卡', desc: '养成早起习惯，开启高效一天', color: '#c59a5f', days: 21,
+        tasks: [
+          { time_start: '06:30', time_end: '06:45', title: '☀️ 早起洗漱', category: 'other', emoji: '☀️', widgets: ['counter'] },
+          { time_start: '06:45', time_end: '07:00', title: '🧘 晨间冒想', category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
+          { time_start: '07:00', time_end: '07:30', title: '🍳 健康早餐', category: 'food', emoji: '🍳' },
+        ]},
+      { id: 'fitness', cover: '💪', title: '30天马甲线养成', desc: '科学训练+饮食记录', color: '#5f8a6e', days: 30,
+        tasks: [
+          { time_start: '07:00', time_end: '07:30', title: '🏃 晨跑热身', category: 'exercise', emoji: '🏃' },
+          { time_start: '18:00', time_end: '19:00', title: '💪 核心训练', category: 'exercise', emoji: '💪', widgets: ['pomodoro','counter'] },
+          { time_start: '19:30', time_end: '20:00', title: '🥗 轻食晚餐', category: 'food', emoji: '🥗', widgets: ['micronote'] },
+        ]},
+      { id: 'weekend', cover: '🌟', title: '打工人周末回血', desc: '充实而放松的周末', color: '#6a9cad', days: 2,
+        tasks: [
+          { time_start: '09:00', time_end: '10:00', title: '☕ 慢悠悠早餝咖啡', category: 'food', emoji: '☕' },
+          { time_start: '10:30', time_end: '12:00', title: '📖 读一本好书', category: 'work', emoji: '📖', widgets: ['pomodoro','micronote'] },
+          { time_start: '14:00', time_end: '17:00', title: '🌿 户外散步/探店', category: 'travel', emoji: '🌿' },
+          { time_start: '19:00', time_end: '21:00', title: '🎬 电影之夜', category: 'other', emoji: '🎬' },
+        ]},
+      { id: 'reading', cover: '📚', title: '30天读完三本书', desc: '每天阅读+笔记，每周复盘', color: '#8a7ba8', days: 30,
+        tasks: [
+          { time_start: '08:00', time_end: '09:00', title: '📖 晨读 30页', category: 'work', emoji: '📖', widgets: ['pomodoro','counter'] },
+          { time_start: '21:00', time_end: '21:30', title: '✍️ 读书笔记', category: 'work', emoji: '✍️', widgets: ['micronote'] },
+        ]},
+      { id: 'nosleep', cover: '🌙', title: '30天告别熬夜', desc: '渐进式调整作息', color: '#e08870', days: 30,
+        tasks: [
+          { time_start: '21:30', time_end: '22:00', title: '📵 放下手机', category: 'other', emoji: '📵' },
+          { time_start: '22:00', time_end: '22:20', title: '🧘 睡前拉伸/冒想', category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
+          { time_start: '22:30', time_end: '06:30', title: '😴 睡眠时间', category: 'other', emoji: '😴' },
+        ]},
+    ];
+
+    function applyTemplate(tpl) {
+      const all = lsLoad('lp_plans');
+      const startDate = new Date();
+      for (let day = 0; day < Math.min(tpl.days, 7); day++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + day);
+        const dateStr = toLocalDate(d);
+        for (const task of tpl.tasks) {
+          all.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2,6) + day + all.length,
+            date: dateStr,
+            time_start: task.time_start,
+            time_end: task.time_end,
+            title: task.title,
+            location: '',
+            city: planCity.value,
+            category: task.category,
+            notes: '',
+            emoji: task.emoji || '',
+            color: tpl.color || '',
+            widgets: task.widgets || [],
+            done: false,
+          });
+        }
+      }
+      lsSave('lp_plans', all);
+      plans.value = all;
+      showTemplates.value = false;
+      addXP(10);
+    }
+
+    // ─── Floating Weekly Tasks ───
+    const floatingTasks = ref(lsLoad('lp_floats'));
+    const showFloatModal = ref(false);
+    const floatForm = ref({ title: '', target: 3, emoji: '🎯' });
+    const FLOAT_EMOJIS = ['🎯','💪','📖','🏃','🧘','🌿','☕','🍎'];
+
+    function saveFloat() {
+      if (!floatForm.value.title) return;
+      const all = lsLoad('lp_floats');
+      all.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+        title: floatForm.value.title,
+        emoji: floatForm.value.emoji,
+        target: floatForm.value.target || 3,
+        done: 0,
+        weekStart: getWeekStart(),
+      });
+      lsSave('lp_floats', all);
+      floatingTasks.value = all;
+      showFloatModal.value = false;
+      floatForm.value = { title: '', target: 3, emoji: '🎯' };
+    }
+
+    function bumpFloat(id) {
+      const all = lsLoad('lp_floats');
+      const f = all.find(x => x.id === id);
+      if (f && f.done < f.target) { f.done++; lsSave('lp_floats', all); floatingTasks.value = all; if (f.done >= f.target) addXP(8); }
+    }
+
+    function deleteFloat(id) {
+      const all = lsLoad('lp_floats').filter(x => x.id !== id);
+      lsSave('lp_floats', all);
+      floatingTasks.value = all;
+    }
+
+    function getWeekStart() {
+      const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return toLocalDate(new Date(d.setDate(diff)));
+    }
+
+    const activeFloats = computed(() => {
+      const ws = getWeekStart();
+      return floatingTasks.value.filter(f => f.weekStart === ws);
+    });
 
     // ─── Quick Action Cards ───
     const QUICK_ACTIONS = [
@@ -674,6 +804,35 @@ const app = createApp({
       await loadPlans();
     }
 
+    function skipPlan(id) {
+      const all = lsLoad('lp_plans');
+      const p = all.find(x => x.id === id);
+      if (p) { p.skipped = !p.skipped; if (p.skipped) p.done = false; lsSave('lp_plans', all); plans.value = all; }
+    }
+
+    function toggleWidget(key) {
+      const w = planForm.value.widgets || [];
+      const idx = w.indexOf(key);
+      if (idx >= 0) w.splice(idx, 1); else w.push(key);
+      planForm.value.widgets = [...w];
+    }
+
+    function bumpCounter(id) {
+      const all = lsLoad('lp_plans');
+      const p = all.find(x => x.id === id);
+      if (p) { p.counterVal = (p.counterVal || 0) + 1; lsSave('lp_plans', all); plans.value = all; }
+    }
+
+    function saveMicronote(id, text) {
+      const all = lsLoad('lp_plans');
+      const p = all.find(x => x.id === id);
+      if (p) { p.micronote = text; lsSave('lp_plans', all); plans.value = all; }
+    }
+
+    function startPlanPomodoro(p) {
+      showPomodoro.value = true;
+    }
+
     // ─── Complete / Reward ───
     function spawnConfetti(evt) {
       const rect = evt.target.getBoundingClientRect();
@@ -728,9 +887,11 @@ const app = createApp({
       const dayPlans = plans.value.filter(p => p.date === planDate.value);
       const total = dayPlans.length;
       const done = dayPlans.filter(p => p.done).length;
+      const skipped = dayPlans.filter(p => p.skipped).length;
+      const active = total - skipped;
       const stars = done >= 5 ? 3 : done >= 3 ? 2 : done >= 1 ? 1 : 0;
       const titles = ['还没开始哦', '初露锋芒 ✨', '势不可挡 🔥', '超级达人 🏆'];
-      return { total, done, stars, title: titles[stars] };
+      return { total: active, done, stars, title: titles[stars] };
     });
 
     // ─── Share ───
@@ -1097,13 +1258,14 @@ const app = createApp({
     const totalFocusMin = computed(() => focusHistory.value.reduce((s, f) => s + (f.min || 0), 0));
     function startFocus() {
       focusState.value = 'running'; focusRemaining.value = focusDuration.value * 60;
+      immersive.value = true;
       _focusInterval = setInterval(() => {
         focusRemaining.value--;
         if (focusRemaining.value <= 0) { clearInterval(_focusInterval); focusState.value = 'done'; }
       }, 1000);
     }
     function abandonFocus() { clearInterval(_focusInterval); focusState.value = 'idle'; focusRemaining.value = 0; }
-    function cancelFocus() { if (focusState.value === 'running') { abandonFocus(); } showPomodoro.value = false; focusState.value = 'idle'; }
+    function cancelFocus() { if (focusState.value === 'running') { abandonFocus(); } showPomodoro.value = false; focusState.value = 'idle'; immersive.value = false; stopAmbient(); }
     function finishFocus() {
       const entry = { id: Date.now().toString(36), date: today(), min: focusDuration.value, ts: Date.now() };
       focusHistory.value.push(entry); lsSave('lp_focus', focusHistory.value);
@@ -1111,7 +1273,50 @@ const app = createApp({
       focusState.value = 'break'; focusRemaining.value = 5 * 60;
       _focusInterval = setInterval(() => { focusRemaining.value--; if (focusRemaining.value <= 0) { clearInterval(_focusInterval); focusState.value = 'idle'; } }, 1000);
     }
-    function endBreak() { clearInterval(_focusInterval); focusState.value = 'idle'; focusRemaining.value = 0; }
+    function endBreak() { clearInterval(_focusInterval); focusState.value = 'idle'; focusRemaining.value = 0; immersive.value = false; stopAmbient(); }
+
+    // ─── Immersive Focus Mode ───
+    const immersive = ref(false);
+    const ambientSound = ref('');
+    let _ambientAudio = null;
+    const AMBIENT_SOUNDS = [
+      { key: '', icon: '🔇', label: '无声' },
+      { key: 'rain', icon: '🌧️', label: '雨声' },
+      { key: 'cafe', icon: '☕', label: '咖啡馆' },
+      { key: 'fire', icon: '🔥', label: '笝火' },
+      { key: 'wave', icon: '🌊', label: '海浪' },
+    ];
+    // Use Web Audio API for white noise generation
+    let _noiseCtx = null, _noiseNode = null, _noiseGain = null;
+    function playAmbient(key) {
+      stopAmbient();
+      ambientSound.value = key;
+      if (!key) return;
+      try {
+        _noiseCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const sr = _noiseCtx.sampleRate;
+        const buf = _noiseCtx.createBuffer(1, sr * 2, sr);
+        const data = buf.getChannelData(0);
+        // Different noise profiles
+        if (key === 'rain') { for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.3 * (0.5 + 0.5 * Math.sin(i / sr * 0.1)); }
+        else if (key === 'fire') { for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.2 * (0.3 + 0.7 * Math.abs(Math.sin(i / sr * 0.3))); }
+        else if (key === 'wave') { for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.25 * (0.5 + 0.5 * Math.sin(i / sr * 0.05)); }
+        else { for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.15; }
+        _noiseNode = _noiseCtx.createBufferSource();
+        _noiseNode.buffer = buf; _noiseNode.loop = true;
+        _noiseGain = _noiseCtx.createGain(); _noiseGain.gain.value = 0.5;
+        // Low-pass filter for softer sound
+        const filter = _noiseCtx.createBiquadFilter();
+        filter.type = 'lowpass'; filter.frequency.value = key === 'rain' ? 2000 : key === 'fire' ? 800 : key === 'wave' ? 1200 : 3000;
+        _noiseNode.connect(filter); filter.connect(_noiseGain); _noiseGain.connect(_noiseCtx.destination);
+        _noiseNode.start();
+      } catch(e) { console.warn('Audio error', e); }
+    }
+    function stopAmbient() {
+      ambientSound.value = '';
+      if (_noiseNode) { try { _noiseNode.stop(); } catch(e) {} _noiseNode = null; }
+      if (_noiseCtx) { try { _noiseCtx.close(); } catch(e) {} _noiseCtx = null; }
+    }
 
     // ─── Time Capsules ───
     const capsules = ref(lsLoad('lp_capsules'));
@@ -1341,6 +1546,7 @@ const app = createApp({
       showOnboarding, onboardStep, obNickname, obAvatar, obCity, obAge,
       onboardNext, onboardBack, profile,
       avatars: AVATARS,
+      PLAN_EMOJIS, PLAN_COLORS,
       quickActions: QUICK_ACTIONS, quickAdd, quickActionSubs,
       hotEvents, addHotEvent, hotCategory, hotCategories, hotExpanded, hotHasMore, toggleHotExpand, hotDetail, openHotDetail, closeHotDetail,
       dailyQuote, refreshQuote, userMotto, editingMotto, mottoInput, startEditMotto, saveMotto, deleteMotto,
@@ -1350,7 +1556,8 @@ const app = createApp({
       // Plan
       planDate, planCity, plans, filteredPlans, next7Days,
       showPlanModal, editingPlan, planForm,
-      savePlan, editPlan, deletePlan, sharePlan, toggleDone, dayReward,
+      savePlan, editPlan, deletePlan, skipPlan, sharePlan, toggleDone, dayReward,
+      PLAN_WIDGETS, toggleWidget, bumpCounter, saveMicronote, startPlanPomodoro,
       // Activity selector
       activityQuery, activityTab, showActivityDropdown, filteredActivities, selectActivity,
       ACTIVITY_GROUPS, ACTIVITIES, CITIES,
@@ -1380,6 +1587,7 @@ const app = createApp({
       allBadges, unlockedBadgeCount,
       // Pomodoro
       showPomodoro, focusState, focusDuration, focusRemaining, focusTimeDisplay, focusPlantEmoji,
+      immersive, ambientSound, AMBIENT_SOUNDS, playAmbient,
       focusHistory, totalFocusMin,
       startFocus, abandonFocus, cancelFocus, finishFocus, endBreak,
       // Time Capsules

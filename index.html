@@ -159,6 +159,27 @@
         </div>
       </div>
 
+      <!-- Floating Weekly Tasks -->
+      <div class="float-section" v-if="activeFloats.length">
+        <div class="float-header">
+          <span class="float-label">💫 本周浮动任务</span>
+        </div>
+        <div class="float-balls">
+          <div class="float-ball" v-for="f in activeFloats" :key="f.id" :class="{completed: f.done >= f.target}" @click="bumpFloat(f.id)" @contextmenu.prevent="deleteFloat(f.id)">
+            <span class="float-emoji">{{f.emoji}}</span>
+            <span class="float-ball-title">{{f.title}}</span>
+            <span class="float-progress">{{f.done}}/{{f.target}}</span>
+            <div class="float-fill" :style="{height: Math.min(f.done/f.target*100,100)+'%'}"></div>
+          </div>
+          <div class="float-ball float-add" @click="showFloatModal=true">
+            <span style="font-size:20px;opacity:0.5">+</span>
+          </div>
+        </div>
+      </div>
+      <div v-else style="margin-bottom:10px">
+        <button class="btn btn-outline btn-sm" @click="showFloatModal=true" style="font-size:12px">💫 + 浮动任务（本周内完成即可）</button>
+      </div>
+
       <!-- Quick Actions -->
       <div class="quick-actions">
         <div class="quick-card" v-for="qa in quickActions" :key="qa.title" @click="quickAdd(qa)">
@@ -168,14 +189,31 @@
       </div>
 
       <!-- Add Plan Button -->
-      <div style="margin-bottom:14px">
-        <button class="btn btn-primary btn-block" @click="showPlanModal=true">
+      <div style="margin-bottom:14px;display:flex;gap:10px">
+        <button class="btn btn-primary" style="flex:1" @click="showPlanModal=true">
           + 自定义计划
         </button>
+        <button class="btn btn-outline" style="flex:0 0 auto;padding:0 16px" @click="showTemplates=!showTemplates">
+          📋 模板
+        </button>
+      </div>
+
+      <!-- Template Library -->
+      <div class="tpl-grid" v-if="showTemplates">
+        <div class="tpl-card" v-for="tpl in PLAN_TEMPLATES" :key="tpl.id" :style="{'--tpl-color': tpl.color}" @click="applyTemplate(tpl)">
+          <div class="tpl-cover">{{tpl.cover}}</div>
+          <div class="tpl-info">
+            <div class="tpl-title">{{tpl.title}}</div>
+            <div class="tpl-desc">{{tpl.desc}}</div>
+            <div class="tpl-meta">{{tpl.days}}天 · 每天{{tpl.tasks.length}}项</div>
+          </div>
+          <div class="tpl-glow"></div>
+        </div>
       </div>
 
       <!-- Reward Banner -->
       <div class="reward-banner" v-if="dayReward.total">
+        <div class="reward-water" :style="{height: (dayReward.total?dayReward.done/dayReward.total*100:0)+'%'}"></div>
         <div class="reward-stars">
           <span v-for="n in 3" :key="n" class="reward-star" :class="{earned: n<=dayReward.stars}">⭐</span>
         </div>
@@ -191,12 +229,23 @@
       <!-- Plan List -->
       <div v-if="filteredPlans.length">
         <div v-for="p in filteredPlans" :key="p.id"
-             class="plan-item" :class="['cat-'+p.category, {done: p.done}]" :data-plan-id="p.id">
+             class="plan-item" :class="['cat-'+p.category, {done: p.done, skipped: p.skipped}]" :data-plan-id="p.id"
+             :style="p.color ? {'--plan-color': p.color} : {}">
+          <div class="plan-color-glow" v-if="p.color"></div>
           <div class="plan-time">{{p.time_start}} — {{p.time_end}}</div>
-          <div class="plan-title">{{p.title}}</div>
+          <div class="plan-title"><span class="plan-emoji" v-if="p.emoji">{{p.emoji}}</span>{{p.title}}</div>
           <div class="plan-location" v-if="p.location">{{p.location}}</div>
+          <!-- Attached widgets -->
+          <div class="plan-widgets" v-if="p.widgets && p.widgets.length && !p.skipped">
+            <div v-if="p.widgets.includes('pomodoro')" class="pw pw-pomo" @click.stop="startPlanPomodoro(p)">🍅 开始专注</div>
+            <div v-if="p.widgets.includes('counter')" class="pw pw-counter" @click.stop="bumpCounter(p.id)">📊 {{p.counterVal||0}} 次 <span class="pw-plus">+1</span></div>
+            <div v-if="p.widgets.includes('micronote')" class="pw pw-note">
+              <input type="text" class="pw-note-input" :value="p.micronote||''" @change="saveMicronote(p.id, $event.target.value)" @click.stop placeholder="记一笔..." />
+            </div>
+          </div>
           <div class="plan-actions">
-            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id, $event)" title="完成">{{p.done ? '✅' : '⬜'}}</button>
+            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id, $event)" title="完成" v-if="!p.skipped">{{p.done ? '✅' : '⬜'}}</button>
+            <button @click="skipPlan(p.id)" :title="p.skipped ? '恢复' : '请假'">{{p.skipped ? '🔄' : '😴'}}</button>
             <button @click="sharePlan(p)" title="分享">↗</button>
             <button @click="editPlan(p)" title="编辑">✎</button>
             <button @click="deletePlan(p.id)" title="删除">×</button>
@@ -456,11 +505,11 @@
     </div>
   </div>
 
-  <!-- ═══ Pomodoro Modal ═══ -->
-  <div class="modal-overlay" v-if="showPomodoro" @click.self="cancelFocus">
-    <div class="modal-content pomodoro-modal">
+  <!-- ═══ Pomodoro / Immersive Focus Modal ═══ -->
+  <div class="modal-overlay" :class="{'immersive-overlay': immersive}" v-if="showPomodoro" @click.self="cancelFocus">
+    <div class="modal-content pomodoro-modal" :class="{'immersive-modal': immersive}">
       <div class="modal-header">
-        <h3>{{focusState==='idle'?'🍅 专注计时器':(focusState==='break'?'☕ 休息时间':'🌱 专注中')}}</h3>
+        <h3>{{focusState==='idle'?'🍅 专注计时器':(focusState==='break'?'☕ 休息时间':'🌱 心流模式')}}</h3>
         <button class="modal-close" @click="cancelFocus">×</button>
       </div>
       <div class="pomo-plant">{{focusPlantEmoji}}</div>
@@ -469,11 +518,18 @@
         <div class="pomo-presets">
           <button v-for="m in [15,25,45]" :key="m" class="btn btn-sm" :class="focusDuration===m?'btn-primary':'btn-outline'" @click="focusDuration=m">{{m}}分钟</button>
         </div>
-        <button class="btn btn-primary btn-block" style="margin-top:14px" @click="startFocus">开始专注 🌱</button>
+        <button class="btn btn-primary btn-block" style="margin-top:14px" @click="startFocus">进入心流 🌱</button>
       </div>
       <div class="pomo-controls" v-else-if="focusState==='running'">
-        <p style="color:var(--text2);font-size:13px;text-align:center">专注中…离开页面小树会枯萎哦</p>
-        <button class="btn btn-outline btn-block" style="margin-top:10px;color:var(--rose)" @click="abandonFocus">放弃专注 🥀</button>
+        <p style="color:var(--text2);font-size:13px;text-align:center">专注中…沉浸在当下</p>
+        <!-- White Noise -->
+        <div class="ambient-bar">
+          <span v-for="s in AMBIENT_SOUNDS" :key="s.key" class="ambient-btn" :class="{active: ambientSound===s.key}" @click="playAmbient(s.key)">
+            <span class="ambient-icon">{{s.icon}}</span>
+            <span class="ambient-label">{{s.label}}</span>
+          </span>
+        </div>
+        <button class="btn btn-outline btn-block" style="margin-top:14px;color:var(--rose)" @click="abandonFocus">放弃专注 🥀</button>
       </div>
       <div class="pomo-controls" v-else-if="focusState==='done'">
         <p style="text-align:center;font-size:15px">🎉 太棒了！专注完成！</p>
@@ -510,6 +566,33 @@
   </div>
 
   <!-- ═══ Capsule View Modal ═══ -->
+  <!-- ═══ Float Task Modal ═══ -->
+  <div class="modal-overlay" v-if="showFloatModal" @click.self="showFloatModal=false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💫 新建浮动任务</h3>
+        <button class="modal-close" @click="showFloatModal=false">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">图标</label>
+        <div class="emoji-picker-inline">
+          <span v-for="e in FLOAT_EMOJIS" :key="e" class="emoji-opt" :class="{active: floatForm.emoji===e}" @click="floatForm.emoji=e">{{e}}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">任务名称</label>
+        <input type="text" class="form-input" v-model="floatForm.title" placeholder="例：本周跑步3次">
+      </div>
+      <div class="form-group">
+        <label class="form-label">本周目标次数</label>
+        <input type="number" class="form-input" v-model.number="floatForm.target" min="1" max="20">
+      </div>
+      <button class="btn btn-primary btn-block" @click="saveFloat">
+        添加浮动任务
+      </button>
+    </div>
+  </div>
+
   <div class="modal-overlay" v-if="viewingCapsule" @click.self="viewingCapsule=null">
     <div class="modal-content">
       <div class="modal-header">
@@ -620,6 +703,31 @@
             </div>
           </div>
 
+        </div>
+      </div>
+      <!-- Emoji & Color Picker -->
+      <div class="form-group">
+        <label class="form-label">图标 & 主题色</label>
+        <div class="emoji-color-row">
+          <div class="emoji-picker-inline">
+            <span v-for="e in PLAN_EMOJIS" :key="e" class="emoji-opt" :class="{active: planForm.emoji===e}" @click="planForm.emoji = planForm.emoji===e ? '' : e">{{e}}</span>
+          </div>
+          <div class="color-picker-inline">
+            <span v-for="c in PLAN_COLORS" :key="c.value" class="color-opt" :class="{active: planForm.color===c.value}" :style="c.value ? {background: c.value} : {}" @click="planForm.color = planForm.color===c.value ? '' : c.value" :title="c.name">
+              <span v-if="!c.value" style="font-size:10px">无</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <!-- Widget picker -->
+      <div class="form-group">
+        <label class="form-label">挂载组件</label>
+        <div class="widget-picker">
+          <div v-for="w in PLAN_WIDGETS" :key="w.key" class="widget-opt" :class="{active: (planForm.widgets||[]).includes(w.key)}" @click="toggleWidget(w.key)">
+            <span class="widget-opt-icon">{{w.icon}}</span>
+            <span class="widget-opt-label">{{w.label}}</span>
+            <span class="widget-opt-desc">{{w.desc}}</span>
+          </div>
         </div>
       </div>
       <div class="form-group">
