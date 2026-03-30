@@ -619,7 +619,22 @@ const app = createApp({
     });
 
     async function loadPlans() {
-      plans.value = lsLoad('lp_plans');
+      let all = lsLoad('lp_plans');
+      // Seed example plans for first-time users
+      if (!all.length && !localStorage.getItem('lp_seeded')) {
+        const t = today();
+        const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return toLocalDate(d); })();
+        all = [
+          { id: 'demo_1', date: t, time_start: '07:30', time_end: '08:00', title: '☀️ 晨间冥想', location: '', city: '', category: 'health', notes: '示例：每天花几分钟冥想，开启美好一天', done: false },
+          { id: 'demo_2', date: t, time_start: '09:00', time_end: '11:30', title: '📖 读书学习', location: '图书馆', city: '', category: 'study', notes: '示例：记录你的学习计划，完成后点 ⬜ 打勾', done: false },
+          { id: 'demo_3', date: t, time_start: '12:00', time_end: '13:00', title: '🍜 和朋友约饭', location: '新天地', city: '', category: 'food', notes: '示例：记录聚餐、约会等社交活动', done: false },
+          { id: 'demo_4', date: t, time_start: '18:00', time_end: '19:00', title: '🏃 夜跑5公里', location: '世纪公园', city: '', category: 'exercise', notes: '示例：运动计划，完成后获得 EXP 奖励！', done: false },
+          { id: 'demo_5', date: tomorrow, time_start: '14:00', time_end: '16:00', title: '🎬 看电影', location: '万达影城', city: '', category: 'entertainment', notes: '示例：明天的计划也可以提前安排', done: false },
+        ];
+        lsSave('lp_plans', all);
+        localStorage.setItem('lp_seeded', '1');
+      }
+      plans.value = all;
     }
 
     async function savePlan() {
