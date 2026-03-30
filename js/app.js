@@ -364,7 +364,7 @@ const app = createApp({
     const tab = ref('plan');
     const tabBar = ref(null);
     const tabIndicatorStyle = computed(() => {
-      const tabs = ['plan', 'diary', 'review'];
+      const tabs = ['plan', 'diary', 'review', 'insights'];
       const idx = tabs.indexOf(tab.value);
       const pct = 100 / tabs.length;
       return { left: (idx * pct) + '%', width: pct + '%' };
@@ -633,6 +633,7 @@ const app = createApp({
       } else {
         f.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         all.push(f);
+        addXP(3);
       }
       lsSave('lp_plans', all);
       showPlanModal.value = false;
@@ -695,7 +696,8 @@ const app = createApp({
         lsSave('lp_plans', all);
         plans.value = all;
         if (!wasDone && p.done) {
-          // just completed → confetti + highlight
+          // just completed → confetti + highlight + XP
+          addXP(5);
           if (evt) spawnConfetti(evt);
           nextTick(() => {
             const el = document.querySelector(`[data-plan-id="${id}"]`);
@@ -758,6 +760,7 @@ const app = createApp({
       } else {
         f.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         all.push(f);
+        addXP(8);
       }
       lsSave('lp_diary', all);
       showDiaryModal.value = false;
@@ -869,11 +872,261 @@ const app = createApp({
       aiReviewResult.value = '提示：静态部署模式下 AI 功能暂不可用';
     }
 
+    // ─── XP & Level System ───
+    const XP_TABLE = [0,30,80,150,250,400,600,850,1200,1600,2100,2700,3400,4200,5200,6400,7800,9500,11500,14000];
+    const LEVEL_TITLES = ['初学者','见习者','规划者','记录者','行动派','时光猎手','效率达人','自律之星','时间领主','生活大师'];
+    const totalXP = ref(parseInt(localStorage.getItem('lp_xp') || '0'));
+    const userLevel = computed(() => { let l = 1; for (let i = XP_TABLE.length - 1; i >= 0; i--) { if (totalXP.value >= XP_TABLE[i]) { l = i + 1; break; } } return Math.min(l, XP_TABLE.length); });
+    const levelTitle = computed(() => LEVEL_TITLES[Math.min(Math.floor((userLevel.value-1)/2), LEVEL_TITLES.length-1)]);
+    const nextLevelXP = computed(() => XP_TABLE[Math.min(userLevel.value, XP_TABLE.length-1)] || XP_TABLE[XP_TABLE.length-1]);
+    const xpProgress = computed(() => { const prev = XP_TABLE[userLevel.value-1] || 0; const next = nextLevelXP.value; return next > prev ? ((totalXP.value - prev) / (next - prev) * 100) : 100; });
+    function addXP(amount) { totalXP.value += amount; localStorage.setItem('lp_xp', String(totalXP.value)); }
+
+    // ─── Stats Overview ───
+    const statsOverview = computed(() => {
+      const allP = plans.value;
+      const totalPlans = allP.length;
+      const completedPlans = allP.filter(p => p.done).length;
+      const diaryCount = diaryEntries.value.length;
+      // Streak: consecutive days with at least 1 completed plan (ending today or yesterday)
+      let streak = 0;
+      const doneByDate = {};
+      allP.filter(p => p.done).forEach(p => { doneByDate[p.date] = true; });
+      const d = new Date(); d.setHours(0,0,0,0);
+      // check from today backwards
+      if (!doneByDate[toLocalDate(d)]) d.setDate(d.getDate() - 1); // allow gap of today if not yet done
+      while (doneByDate[toLocalDate(d)]) { streak++; d.setDate(d.getDate() - 1); }
+      return { totalPlans, completedPlans, diaryCount, streak };
+    });
+
+    // ─── Mood Trend Chart ───
+    const moodCanvas = ref(null);
+    const MOOD_VALUES = { great: 5, love: 5, calm: 4, ok: 3, sad: 2, angry: 1, anxious: 0 };
+    function drawMoodChart() {
+      const canvas = moodCanvas.value; if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      // Gather last 30 days mood data
+      const days = []; const d = new Date();
+      for (let i = 29; i >= 0; i--) { const dd = new Date(d); dd.setDate(dd.getDate() - i); days.push(toLocalDate(dd)); }
+      const pts = days.map(day => {
+        const entries = diaryEntries.value.filter(e => e.date === day);
+        if (!entries.length) return null;
+        return entries.reduce((s, e) => s + (MOOD_VALUES[e.mood] ?? 3), 0) / entries.length;
+      });
+      const pad = { l: 30, r: 10, t: 15, b: 25 };
+      const chartW = W - pad.l - pad.r, chartH = H - pad.t - pad.b;
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) { const y = pad.t + chartH - (i / 5) * chartH; ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke(); }
+      // Plot line
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--indigo').trim() || '#c59a5f'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); let started = false;
+      pts.forEach((v, i) => {
+        if (v === null) { started = false; return; }
+        const x = pad.l + (i / 29) * chartW; const y = pad.t + chartH - (v / 5) * chartH;
+        if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
+      });
+      ctx.stroke();
+      // Dots
+      pts.forEach((v, i) => {
+        if (v === null) return;
+        const x = pad.l + (i / 29) * chartW; const y = pad.t + chartH - (v / 5) * chartH;
+        ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+      });
+      // Labels
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '18px sans-serif'; ctx.textAlign = 'center';
+      [0, 9, 19, 29].forEach(i => {
+        const x = pad.l + (i / 29) * chartW;
+        ctx.fillText(days[i].slice(5), x, H - 4);
+      });
+    }
+
+    // ─── Habit Heatmap ───
+    const heatmapDays = computed(() => {
+      const days = []; const d = new Date();
+      const doneByDate = {};
+      plans.value.filter(p => p.done).forEach(p => { doneByDate[p.date] = (doneByDate[p.date] || 0) + 1; });
+      // pad to start on Sunday
+      const end = new Date(d); end.setHours(0,0,0,0);
+      const start = new Date(end); start.setDate(start.getDate() - 90);
+      // align start to Sunday
+      start.setDate(start.getDate() - start.getDay());
+      for (let cur = new Date(start); cur <= end; cur.setDate(cur.getDate() + 1)) {
+        const ds = toLocalDate(cur);
+        const count = doneByDate[ds] || 0;
+        const level = count === 0 ? 0 : count <= 1 ? 1 : count <= 3 ? 2 : count <= 5 ? 3 : 4;
+        days.push({ date: ds, count, level });
+      }
+      return days;
+    });
+    const heatmapMonths = computed(() => {
+      const days = heatmapDays.value; if (!days.length) return [];
+      const months = []; let lastM = '';
+      days.forEach((d, i) => {
+        const m = d.date.slice(0, 7);
+        if (m !== lastM) { months.push({ label: parseInt(d.date.slice(5, 7)) + '月', offset: (i / days.length) * 100 }); lastM = m; }
+      });
+      return months;
+    });
+
+    // ─── 24h Time Pie Chart ───
+    const pieCanvas = ref(null);
+    const pieDateOffset = ref(0);
+    const pieDate = computed(() => { const d = new Date(); d.setDate(d.getDate() + pieDateOffset.value); return toLocalDate(d); });
+    const pieDateLabel = computed(() => { if (pieDateOffset.value === 0) return '今天'; if (pieDateOffset.value === -1) return '昨天'; return pieDate.value; });
+    const PIE_COLORS = ['#c59a5f','#7cb8ca','#a494c4','#e08888','#7aad8b','#5ab8c7','#c99aaa','#8a9ab0','#f0c674','#66bb6a'];
+    const pieSlices = computed(() => {
+      const dayPlans = plans.value.filter(p => p.date === pieDate.value && p.time_start && p.time_end);
+      if (!dayPlans.length) return [];
+      const cats = {};
+      dayPlans.forEach(p => {
+        const [sh, sm] = p.time_start.split(':').map(Number);
+        const [eh, em] = p.time_end.split(':').map(Number);
+        const hours = Math.max(0, ((eh * 60 + em) - (sh * 60 + sm)) / 60);
+        const cat = p.category || p.title || '其他';
+        cats[cat] = (cats[cat] || 0) + hours;
+      });
+      const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+      return entries.map(([label, hours], i) => ({ label, hours: Math.round(hours * 10) / 10, color: PIE_COLORS[i % PIE_COLORS.length] }));
+    });
+    function drawPieChart() {
+      const canvas = pieCanvas.value; if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 10;
+      ctx.clearRect(0, 0, W, H);
+      const slices = pieSlices.value;
+      if (!slices.length) return;
+      const total = slices.reduce((s, sl) => s + sl.hours, 0);
+      let angle = -Math.PI / 2;
+      slices.forEach(sl => {
+        const sweep = (sl.hours / total) * Math.PI * 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, angle, angle + sweep); ctx.closePath();
+        ctx.fillStyle = sl.color; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+        angle += sweep;
+      });
+      // Inner hole for donut
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2); ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#1a1a2e'; ctx.fill();
+    }
+
+    // ─── Monthly Report ───
+    const reportMonth = computed(() => new Date().getMonth() + 1);
+    const monthReport = computed(() => {
+      const m = new Date().getMonth(); const y = new Date().getFullYear();
+      const prefix = `${y}/${String(m + 1).padStart(2, '0')}`;
+      const mPlans = plans.value.filter(p => p.date && p.date.startsWith(prefix));
+      const total = mPlans.length;
+      const completed = mPlans.filter(p => p.done).length;
+      const mDiary = diaryEntries.value.filter(e => e.date && e.date.startsWith(prefix));
+      const diaryCount = mDiary.length;
+      // Top category
+      const catCount = {};
+      mPlans.forEach(p => { const c = p.category || '其他'; catCount[c] = (catCount[c] || 0) + 1; });
+      const topCategory = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+      // Top mood
+      const moodCount = {};
+      mDiary.forEach(e => { if (e.mood) moodCount[e.mood] = (moodCount[e.mood] || 0) + 1; });
+      const topMoodKey = Object.entries(moodCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+      const topMood = topMoodKey ? (MOODS.find(mm => mm.key === topMoodKey)?.emoji || '') : '';
+      // Insight
+      let insight = '';
+      if (total > 0) {
+        const rate = Math.round(completed / total * 100);
+        if (rate >= 80) insight = `完成率${rate}%，太棒了！继续保持这个节奏 💪`;
+        else if (rate >= 50) insight = `完成率${rate}%，还不错，再加把劲就更好了 🌟`;
+        else insight = `完成率${rate}%，试试减少计划数量，专注最重要的事 🎯`;
+      }
+      if (diaryCount >= 20) insight += ' 日记写得很勤快，坚持记录真的很棒！';
+      return { total, completed, diaryCount, topCategory, topMood, insight };
+    });
+
+    // ─── Achievement Badges ───
+    const BADGE_DEFS = [
+      { id: 'early_bird', name: '早鸟', icon: '🐦', desc: '连续3天有8:00前的计划', check: () => { let streak = 0, maxS = 0; const d = new Date(); for (let i = 0; i < 30; i++) { const ds = toLocalDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() - i)); const early = plans.value.some(p => p.date === ds && p.time_start && p.time_start < '08:00'); if (early) { streak++; maxS = Math.max(maxS, streak); } else streak = 0; } return maxS >= 3; }},
+      { id: 'assassin', name: '时间刺客', icon: '⚡', desc: '一天内完成5个以上任务', check: () => { const byDate = {}; plans.value.filter(p => p.done).forEach(p => { byDate[p.date] = (byDate[p.date] || 0) + 1; }); return Object.values(byDate).some(c => c > 5); }},
+      { id: 'writer', name: '碎碎念', icon: '✍️', desc: '日记总字数超过5000字', check: () => diaryEntries.value.reduce((s, e) => s + (e.content?.length || 0), 0) >= 5000 },
+      { id: 'streak3', name: '三日坚持', icon: '🔥', desc: '连续3天完成计划', check: () => statsOverview.value.streak >= 3 },
+      { id: 'streak7', name: '周周不断', icon: '💎', desc: '连续7天完成计划', check: () => statsOverview.value.streak >= 7 },
+      { id: 'streak30', name: '月度之星', icon: '🌟', desc: '连续30天完成计划', check: () => statsOverview.value.streak >= 30 },
+      { id: 'planner50', name: '计划达人', icon: '📋', desc: '累计创建50个计划', check: () => plans.value.length >= 50 },
+      { id: 'planner200', name: '规划大师', icon: '🏆', desc: '累计创建200个计划', check: () => plans.value.length >= 200 },
+      { id: 'diary10', name: '记录者', icon: '📖', desc: '累计写10篇日记', check: () => diaryEntries.value.length >= 10 },
+      { id: 'diary50', name: '日记作家', icon: '📚', desc: '累计写50篇日记', check: () => diaryEntries.value.length >= 50 },
+      { id: 'mood_happy', name: '开心果', icon: '😄', desc: '记录10次开心心情', check: () => diaryEntries.value.filter(e => e.mood === 'great').length >= 10 },
+      { id: 'focus_first', name: '初次专注', icon: '🌱', desc: '完成第一次番茄钟', check: () => focusHistory.value.length >= 1 },
+      { id: 'focus10', name: '专注高手', icon: '🌳', desc: '累计专注10次', check: () => focusHistory.value.length >= 10 },
+      { id: 'capsule', name: '时光旅人', icon: '💌', desc: '写下第一封时光胶囊', check: () => capsules.value.length >= 1 },
+      { id: 'explorer', name: '城市探索', icon: '🗺️', desc: '计划涉及3个不同城市', check: () => new Set(plans.value.map(p => p.city).filter(Boolean)).size >= 3 },
+      { id: 'allmoods', name: '百感交集', icon: '🎭', desc: '使用过所有7种心情', check: () => new Set(diaryEntries.value.map(e => e.mood).filter(Boolean)).size >= 7 },
+    ];
+    const allBadges = computed(() => BADGE_DEFS.map(b => ({ ...b, unlocked: b.check() })));
+    const unlockedBadgeCount = computed(() => allBadges.value.filter(b => b.unlocked).length);
+
+    // ─── Pomodoro Timer ───
+    const showPomodoro = ref(false);
+    const focusState = ref('idle'); // idle | running | done | break
+    const focusDuration = ref(25);
+    const focusRemaining = ref(0);
+    const focusHistory = ref(lsLoad('lp_focus'));
+    let _focusInterval = null;
+    const focusTimeDisplay = computed(() => { const m = Math.floor(focusRemaining.value / 60); const s = focusRemaining.value % 60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; });
+    const focusPlantEmoji = computed(() => {
+      if (focusState.value === 'idle') return '🌱';
+      if (focusState.value === 'done') return '🌳';
+      if (focusState.value === 'break') return '☕';
+      const pct = 1 - focusRemaining.value / (focusDuration.value * 60);
+      if (pct < 0.33) return '🌱'; if (pct < 0.66) return '🌿'; return '🌲';
+    });
+    const totalFocusMin = computed(() => focusHistory.value.reduce((s, f) => s + (f.min || 0), 0));
+    function startFocus() {
+      focusState.value = 'running'; focusRemaining.value = focusDuration.value * 60;
+      _focusInterval = setInterval(() => {
+        focusRemaining.value--;
+        if (focusRemaining.value <= 0) { clearInterval(_focusInterval); focusState.value = 'done'; }
+      }, 1000);
+    }
+    function abandonFocus() { clearInterval(_focusInterval); focusState.value = 'idle'; focusRemaining.value = 0; }
+    function cancelFocus() { if (focusState.value === 'running') { abandonFocus(); } showPomodoro.value = false; focusState.value = 'idle'; }
+    function finishFocus() {
+      const entry = { id: Date.now().toString(36), date: today(), min: focusDuration.value, ts: Date.now() };
+      focusHistory.value.push(entry); lsSave('lp_focus', focusHistory.value);
+      addXP(focusDuration.value >= 25 ? 15 : 8);
+      focusState.value = 'break'; focusRemaining.value = 5 * 60;
+      _focusInterval = setInterval(() => { focusRemaining.value--; if (focusRemaining.value <= 0) { clearInterval(_focusInterval); focusState.value = 'idle'; } }, 1000);
+    }
+    function endBreak() { clearInterval(_focusInterval); focusState.value = 'idle'; focusRemaining.value = 0; }
+
+    // ─── Time Capsules ───
+    const capsules = ref(lsLoad('lp_capsules'));
+    const showCapsuleModal = ref(false);
+    const viewingCapsule = ref(null);
+    const capsuleForm = ref({ deliverDate: '', content: '' });
+    const capsuleMinDate = computed(() => { const d = new Date(); d.setDate(d.getDate() + 1); return toLocalDate(d); });
+    function saveCapsule() {
+      if (!capsuleForm.value.content.trim() || !capsuleForm.value.deliverDate) return;
+      capsules.value.push({ id: Date.now().toString(36), createdDate: today(), deliverDate: capsuleForm.value.deliverDate, content: capsuleForm.value.content, opened: false });
+      lsSave('lp_capsules', capsules.value); addXP(5);
+      capsuleForm.value = { deliverDate: '', content: '' }; showCapsuleModal.value = false;
+    }
+    function viewCapsule(c) { viewingCapsule.value = c; }
+    function checkCapsules() {
+      const t = today(); let changed = false;
+      capsules.value.forEach(c => { if (!c.opened && c.deliverDate <= t) { c.opened = true; changed = true; } });
+      if (changed) lsSave('lp_capsules', capsules.value);
+    }
+
     // ─── Init ───
     onMounted(() => {
       loadPlans();
       loadDiary();
+      checkCapsules();
     });
+
+    // Draw charts when switching to insights tab
+    watch(tab, (v) => { if (v === 'insights') nextTick(() => { drawMoodChart(); drawPieChart(); }); });
+    watch(pieDateOffset, () => nextTick(drawPieChart));
 
     // ─── Hot Events ───
     const hotCategory = ref('全部');
@@ -1101,6 +1354,22 @@ const app = createApp({
       aiTransportResult, aiTransportLoading,
       aiReviewResult, aiReviewLoading,
       getHotActivities, getSuggestPlaces, getTransport, getLifeReview,
+      // Insights — XP & Level
+      totalXP, userLevel, levelTitle, nextLevelXP, xpProgress,
+      statsOverview,
+      // Insights — Charts
+      moodCanvas, pieCanvas, pieDateOffset, pieDate, pieDateLabel, pieSlices,
+      heatmapDays, heatmapMonths,
+      reportMonth, monthReport,
+      // Badges
+      allBadges, unlockedBadgeCount,
+      // Pomodoro
+      showPomodoro, focusState, focusDuration, focusRemaining, focusTimeDisplay, focusPlantEmoji,
+      focusHistory, totalFocusMin,
+      startFocus, abandonFocus, cancelFocus, finishFocus, endBreak,
+      // Time Capsules
+      capsules, showCapsuleModal, capsuleForm, capsuleMinDate, saveCapsule,
+      viewingCapsule, viewCapsule,
       // Auth & Sync
       authToken, authEmail, authPassword, authMode, authError, authLoading,
       showAuthModal, showAccountPanel, syncStatus, syncTitle,

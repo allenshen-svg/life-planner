@@ -401,3 +401,73 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;-webkit-font-smo
 .account-sync{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px}
 .account-sync-status{display:flex;align-items:center;gap:8px;font-size:13px}
 .account-actions{padding-top:8px}
+
+/* ─── Insights Tab ─── */
+.xp-card{padding:16px}
+.xp-header{display:flex;align-items:center;gap:14px}
+.xp-level-badge{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--indigo),rgba(255,255,255,0.2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:52px;text-align:center}
+.xp-info{flex:1}
+.xp-level-title{font-size:13px;color:var(--text2);margin-bottom:4px}
+.xp-bar-track{height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden}
+.xp-bar-fill{height:100%;border-radius:4px;background:var(--indigo);transition:width .5s ease}
+.xp-text{font-size:11px;color:var(--text3);margin-top:3px;text-align:right}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stat-card{background:var(--surface);border-radius:12px;padding:14px 6px;text-align:center;border:1px solid var(--border)}
+.stat-num{font-size:22px;font-weight:700;color:var(--text)}
+.stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* Mood Chart */
+.mood-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;justify-content:center}
+.mood-legend-item{font-size:11px;color:var(--text2)}
+
+/* Heatmap */
+.heatmap-grid{display:flex;flex-wrap:wrap;gap:2px}
+.heatmap-cell{width:12px;height:12px;border-radius:2px;background:rgba(255,255,255,0.06)}
+.heat-1{background:rgba(255,255,255,0.12)}
+.heat-2{background:var(--indigo);opacity:0.45}
+.heat-3{background:var(--indigo);opacity:0.7}
+.heat-4{background:var(--indigo);opacity:1}
+.heatmap-legend{display:flex;align-items:center;gap:3px;margin-top:8px;justify-content:flex-end}
+.heatmap-legend-label{font-size:10px;color:var(--text3);margin:0 2px}
+.heatmap-legend .heatmap-cell{width:10px;height:10px}
+.heatmap-months{position:relative;height:14px;margin-bottom:4px}
+.heatmap-month-label{position:absolute;font-size:10px;color:var(--text3)}
+
+/* Pie Chart */
+.pie-wrap{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap}
+.pie-legend{display:flex;flex-direction:column;gap:4px}
+.pie-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.pie-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pie-date-pick{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:12px;font-size:13px;color:var(--text2)}
+
+/* Monthly Report */
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.report-item{background:rgba(255,255,255,0.04);border-radius:10px;padding:14px 10px;text-align:center}
+.report-num{font-size:20px;font-weight:700;color:var(--text)}
+.report-label{font-size:11px;color:var(--text2);margin-top:2px}
+.report-insight{font-size:13px;color:var(--text2);padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;line-height:1.6}
+
+/* Badges */
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badge-item{text-align:center;padding:10px 4px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);transition:transform .2s}
+.badge-item:not(.locked):hover{transform:scale(1.05)}
+.badge-item.locked{opacity:0.4;filter:grayscale(1)}
+.badge-icon{font-size:28px;margin-bottom:4px}
+.badge-name{font-size:11px;font-weight:600;color:var(--text)}
+.badge-desc{font-size:9px;color:var(--text3);margin-top:2px}
+
+/* Pomodoro */
+.pomodoro-modal{max-width:340px;text-align:center}
+.pomo-plant{font-size:64px;margin:16px 0 8px}
+.pomo-timer{font-size:48px;font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:2px;color:var(--text);margin-bottom:16px}
+.pomo-presets{display:flex;gap:8px;justify-content:center}
+.pomo-controls{padding:0 8px}
+.focus-history{margin-top:12px;font-size:12px;color:var(--text2)}
+.focus-stat{padding:6px 0}
+
+/* Time Capsule */
+.capsule-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:10px;margin-bottom:6px;font-size:13px}
+.capsule-icon{font-size:18px}
+.capsule-date{color:var(--text2);flex:1}
+.capsule-preview{color:var(--text3);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

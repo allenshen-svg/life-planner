@@ -142,6 +142,9 @@
       <div class="tab-item" :class="{active: tab==='review'}" @click="tab='review'">
         <span class="tab-icon">▦</span>回顾
       </div>
+      <div class="tab-item" :class="{active: tab==='insights'}" @click="tab='insights'">
+        <span class="tab-icon">◈</span>洞察
+      </div>
     </div>
 
     <!-- ═══ PLAN TAB ═══ -->
@@ -329,6 +332,194 @@
         <div class="ai-loading" v-if="aiReviewLoading"><div class="spinner"></div><p>AI正在分析你的生活...</p></div>
         <div class="ai-result" v-if="aiReviewResult && !aiReviewLoading">{{aiReviewResult}}</div>
       </div>
+    <!-- ═══ INSIGHTS TAB ═══ -->
+    <div v-if="tab==='insights'">
+      <!-- XP & Level -->
+      <div class="card xp-card">
+        <div class="xp-header">
+          <div class="xp-level-badge">Lv.{{userLevel}}</div>
+          <div class="xp-info">
+            <div class="xp-level-title">{{levelTitle}}</div>
+            <div class="xp-bar-track"><div class="xp-bar-fill" :style="{width: xpProgress+'%'}"></div></div>
+            <div class="xp-text">{{totalXP}} / {{nextLevelXP}} EXP</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num">{{statsOverview.totalPlans}}</div><div class="stat-label">计划总数</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.completedPlans}}</div><div class="stat-label">已完成</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.diaryCount}}</div><div class="stat-label">日记篇数</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.streak}}</div><div class="stat-label">连续天数</div></div>
+      </div>
+
+      <!-- Mood Trend -->
+      <div class="card">
+        <div class="card-title">📈 心情趋势（近30天）</div>
+        <canvas ref="moodCanvas" width="600" height="200" style="width:100%;height:160px"></canvas>
+        <div class="mood-legend">
+          <span v-for="m in moods" :key="m.key" class="mood-legend-item">{{m.emoji}} {{m.label}}</span>
+        </div>
+      </div>
+
+      <!-- Habit Heatmap -->
+      <div class="card">
+        <div class="card-title">🟩 习惯热力图（近90天）</div>
+        <div class="heatmap-months">
+          <span v-for="m in heatmapMonths" :key="m.label" class="heatmap-month-label" :style="{left: m.offset+'%'}">{{m.label}}</span>
+        </div>
+        <div class="heatmap-grid">
+          <div v-for="(d,i) in heatmapDays" :key="i" class="heatmap-cell"
+               :class="'heat-'+d.level" :title="d.date+': '+d.count+'个计划完成'"></div>
+        </div>
+        <div class="heatmap-legend">
+          <span class="heatmap-legend-label">少</span>
+          <span class="heatmap-cell heat-0"></span>
+          <span class="heatmap-cell heat-1"></span>
+          <span class="heatmap-cell heat-2"></span>
+          <span class="heatmap-cell heat-3"></span>
+          <span class="heatmap-cell heat-4"></span>
+          <span class="heatmap-legend-label">多</span>
+        </div>
+      </div>
+
+      <!-- 24h Time Pie -->
+      <div class="card">
+        <div class="card-title">🕐 时间分配（{{pieDateLabel}}）</div>
+        <div class="pie-date-pick">
+          <button class="btn btn-sm btn-outline" @click="pieDateOffset--">‹ 前一天</button>
+          <span>{{pieDate}}</span>
+          <button class="btn btn-sm btn-outline" @click="pieDateOffset < 0 && pieDateOffset++">后一天 ›</button>
+        </div>
+        <div class="pie-wrap">
+          <canvas ref="pieCanvas" width="300" height="300" style="width:200px;height:200px"></canvas>
+          <div class="pie-legend">
+            <div v-for="s in pieSlices" :key="s.label" class="pie-legend-item">
+              <span class="pie-dot" :style="{background: s.color}"></span>
+              {{s.label}} {{s.hours}}h
+            </div>
+            <div v-if="!pieSlices.length" class="empty-state" style="padding:8px"><p>当天无计划数据</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Report -->
+      <div class="card monthly-report">
+        <div class="card-title">📋 {{reportMonth}}月时光报告</div>
+        <div class="report-grid">
+          <div class="report-item"><div class="report-num">{{monthReport.completed}}/{{monthReport.total}}</div><div class="report-label">计划完成率</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.diaryCount}}</div><div class="report-label">日记篇数</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.topCategory || '—'}}</div><div class="report-label">最常计划</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.topMood || '—'}}</div><div class="report-label">主要心情</div></div>
+        </div>
+        <div class="report-insight" v-if="monthReport.insight">💡 {{monthReport.insight}}</div>
+      </div>
+
+      <!-- Achievement Badges -->
+      <div class="card">
+        <div class="card-title">🏆 成就徽章（{{unlockedBadgeCount}}/{{allBadges.length}}）</div>
+        <div class="badge-grid">
+          <div v-for="b in allBadges" :key="b.id" class="badge-item" :class="{locked: !b.unlocked}" :title="b.desc">
+            <div class="badge-icon">{{b.unlocked ? b.icon : '🔒'}}</div>
+            <div class="badge-name">{{b.name}}</div>
+            <div class="badge-desc">{{b.unlocked ? b.desc : '???'}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pomodoro Entry -->
+      <div class="card" style="text-align:center">
+        <div class="card-title">🍅 专注计时器</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">开始专注，种下一棵小树</p>
+        <button class="btn btn-primary" @click="showPomodoro=true">开始专注</button>
+        <div class="focus-history" v-if="focusHistory.length">
+          <div class="focus-stat">累计专注 {{totalFocusMin}} 分钟 · {{focusHistory.length}} 次</div>
+        </div>
+      </div>
+
+      <!-- Time Capsule Entry -->
+      <div class="card" style="text-align:center">
+        <div class="card-title">💌 时光胶囊</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">给未来的自己写一封信</p>
+        <button class="btn btn-primary" @click="showCapsuleModal=true">写一封信</button>
+        <div v-if="capsules.length" style="margin-top:12px">
+          <div v-for="c in capsules" :key="c.id" class="capsule-item">
+            <span class="capsule-icon">{{c.opened ? '📨' : '✉️'}}</span>
+            <span class="capsule-date">{{c.opened ? '已开启' : c.deliverDate+' 开启'}}</span>
+            <span class="capsule-preview" v-if="c.opened">{{c.content.substring(0,30)}}…</span>
+            <button v-if="!c.opened" class="btn btn-sm btn-outline" disabled>未到时间</button>
+            <button v-if="c.opened" class="btn btn-sm btn-outline" @click="viewCapsule(c)">查看</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Pomodoro Modal ═══ -->
+  <div class="modal-overlay" v-if="showPomodoro" @click.self="cancelFocus">
+    <div class="modal-content pomodoro-modal">
+      <div class="modal-header">
+        <h3>{{focusState==='idle'?'🍅 专注计时器':(focusState==='break'?'☕ 休息时间':'🌱 专注中')}}</h3>
+        <button class="modal-close" @click="cancelFocus">×</button>
+      </div>
+      <div class="pomo-plant">{{focusPlantEmoji}}</div>
+      <div class="pomo-timer">{{focusTimeDisplay}}</div>
+      <div class="pomo-controls" v-if="focusState==='idle'">
+        <div class="pomo-presets">
+          <button v-for="m in [15,25,45]" :key="m" class="btn btn-sm" :class="focusDuration===m?'btn-primary':'btn-outline'" @click="focusDuration=m">{{m}}分钟</button>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:14px" @click="startFocus">开始专注 🌱</button>
+      </div>
+      <div class="pomo-controls" v-else-if="focusState==='running'">
+        <p style="color:var(--text2);font-size:13px;text-align:center">专注中…离开页面小树会枯萎哦</p>
+        <button class="btn btn-outline btn-block" style="margin-top:10px;color:var(--rose)" @click="abandonFocus">放弃专注 🥀</button>
+      </div>
+      <div class="pomo-controls" v-else-if="focusState==='done'">
+        <p style="text-align:center;font-size:15px">🎉 太棒了！专注完成！</p>
+        <p style="text-align:center;color:var(--text2);font-size:13px">+{{focusDuration >= 25 ? 15 : 8}} EXP</p>
+        <button class="btn btn-primary btn-block" style="margin-top:10px" @click="finishFocus">收下奖励 🌳</button>
+      </div>
+      <div class="pomo-controls" v-else-if="focusState==='break'">
+        <p style="text-align:center;color:var(--text2);font-size:13px">休息一下，活动活动身体</p>
+        <button class="btn btn-outline btn-block" style="margin-top:10px" @click="endBreak">结束休息</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Time Capsule Write Modal ═══ -->
+  <div class="modal-overlay" v-if="showCapsuleModal" @click.self="showCapsuleModal=false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💌 给未来的自己</h3>
+        <button class="modal-close" @click="showCapsuleModal=false">×</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">开启日期</label>
+        <input type="date" class="form-input" v-model="capsuleForm.deliverDate" :min="capsuleMinDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">写给未来的话</label>
+        <textarea class="form-textarea" v-model="capsuleForm.content" rows="6"
+                  placeholder="亲爱的未来的我，当你看到这封信的时候…"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" @click="saveCapsule" :disabled="!capsuleForm.content.trim()">
+        封存时光胶囊 ✉️
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Capsule View Modal ═══ -->
+  <div class="modal-overlay" v-if="viewingCapsule" @click.self="viewingCapsule=null">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📨 来自过去的信</h3>
+        <button class="modal-close" @click="viewingCapsule=null">×</button>
+      </div>
+      <div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:12px">
+        写于 {{viewingCapsule.createdDate}}
+      </div>
+      <div style="white-space:pre-wrap;line-height:1.8;font-size:14px">{{viewingCapsule.content}}</div>
     </div>
   </div>
 
@@ -579,7 +770,7 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="js/vue.global.prod.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
