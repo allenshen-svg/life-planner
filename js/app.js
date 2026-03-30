@@ -1558,6 +1558,9 @@ const app = createApp({
       showPlanModal, editingPlan, planForm,
       savePlan, editPlan, deletePlan, skipPlan, sharePlan, toggleDone, dayReward,
       PLAN_WIDGETS, toggleWidget, bumpCounter, saveMicronote, startPlanPomodoro,
+      PLAN_TEMPLATES, showTemplates, applyTemplate,
+      floatingTasks, activeFloats, showFloatModal, floatForm, FLOAT_EMOJIS,
+      saveFloat, bumpFloat, deleteFloat,
       // Activity selector
       activityQuery, activityTab, showActivityDropdown, filteredActivities, selectActivity,
       ACTIVITY_GROUPS, ACTIVITIES, CITIES,
