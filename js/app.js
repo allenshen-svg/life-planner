@@ -397,11 +397,13 @@ const app = createApp({
       themeColor.value = color;
       localStorage.setItem('lp_theme', color);
       document.documentElement.style.setProperty('--indigo', color);
+      showThemePicker.value = false;
     }
     function setBgTheme(bg) {
       bgTheme.value = bg;
       localStorage.setItem('lp_bg', bg);
       document.documentElement.setAttribute('data-bg', bg === 'coffee' ? '' : bg);
+      showThemePicker.value = false;
     }
     // Apply saved theme on load
     onMounted(() => {
