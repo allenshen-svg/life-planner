@@ -78,7 +78,7 @@
         <span class="sync-dot" :class="syncStatus" v-if="authToken" :title="syncTitle"></span>
       </div>
       <div class="theme-picker-wrap">
-        <button class="theme-btn" @click="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题"></button>
+        <button class="theme-btn" @click.stop="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题"></button>
         <div class="theme-dropdown" v-if="showThemePicker" @click.stop>
           <div class="theme-section-label">背景氛围</div>
           <div class="theme-bg-grid">
