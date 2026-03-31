@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时光手记 - 技术支持</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Fira+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-start: #0f0c29;
+            --color-bg-mid: #302b63;
+            --color-bg-end: #24243e;
+            --color-glass-bg: rgba(255, 255, 255, 0.07);
+            --color-glass-border: rgba(255, 255, 255, 0.12);
+            --color-glass-hover: rgba(255, 255, 255, 0.12);
+            --color-text: rgba(255, 255, 255, 0.92);
+            --color-text-secondary: rgba(255, 255, 255, 0.6);
+            --color-accent: #FF9500;
+            --color-accent-glow: rgba(255, 149, 0, 0.3);
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Fira Sans', sans-serif;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            line-height: 1.8;
+            color: var(--color-text);
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--color-bg-start), var(--color-bg-mid), var(--color-bg-end));
+            background-attachment: fixed;
+            overflow-x: hidden;
+            padding: 40px 20px 60px;
+        }
+
+        .animated-background {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 30%, rgba(255, 149, 0, 0.12), transparent),
+                radial-gradient(ellipse 500px 500px at 80% 70%, rgba(120, 80, 220, 0.10), transparent);
+            animation: moveBackground 20s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes moveBackground {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(-30px, 20px) scale(1.05); }
+            100% { transform: translate(20px, -15px) scale(1); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff, var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            font-weight: 300;
+            margin-bottom: 36px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 149, 0, 0.25);
+        }
+
+        h2 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--color-text);
+            margin: 32px 0 16px;
+        }
+
+        .frosted-card {
+            background: var(--color-glass-bg);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid var(--color-glass-border);
+            border-radius: 16px;
+            padding: 22px 26px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        .frosted-card:hover {
+            transform: translateY(-3px) scale(1.008);
+            background: var(--color-glass-hover);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 0 0 20px var(--color-accent-glow);
+        }
+
+        .frosted-card strong {
+            display: block;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 1.02rem;
+            color: var(--color-accent);
+            margin-bottom: 6px;
+        }
+
+        .frosted-card p {
+            font-weight: 300;
+            font-size: 0.93rem;
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        .frosted-card a {
+            color: var(--color-accent);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 149, 0, 0.3);
+            transition: border-color 0.2s ease;
+        }
+
+        .frosted-card a:hover {
+            border-bottom-color: var(--color-accent);
+        }
+
+        .contact-card {
+            text-align: center;
+            margin-top: 36px;
+        }
+
+        .contact-card p {
+            font-weight: 300;
+            font-size: 0.93rem;
+            color: var(--color-text-secondary);
+        }
+
+        .contact-card a {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 149, 0, 0.3);
+            transition: border-color 0.2s ease;
+        }
+
+        .contact-card a:hover {
+            border-bottom-color: var(--color-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-background"></div>
+    <div class="container">
+        <h1>时光手记</h1>
+        <p class="subtitle">技术支持 · 常见问题</p>
+
+        <h2>常见问题</h2>
+
+        <div class="frosted-card">
+            <strong>Q: 我的数据安全吗？</strong>
+            <p>A: 所有数据存储在您的设备本地，不会上传到任何服务器。请参阅我们的<a href="timelog-privacy.html">隐私政策</a>了解详情。</p>
+        </div>
+
+        <div class="frosted-card">
+            <strong>Q: AI 生活点评功能是怎么工作的？</strong>
+            <p>A: 当您点击"AI 生活点评"时，会将您的计划和日记摘要发送给 AI 模型进行分析，帮助您更好地回顾和改善生活安排。</p>
+        </div>
+
+        <div class="frosted-card">
+            <strong>Q: 如何切换 AI 模型？</strong>
+            <p>A: 在页面顶部右侧有一个下拉菜单，可以在 DeepSeek、智谱和 SiliconFlow 之间切换。</p>
+        </div>
+
+        <div class="frosted-card">
+            <strong>Q: 删除 App 后数据会丢失吗？</strong>
+            <p>A: 是的，所有数据存储在应用本地，卸载 App 会导致数据丢失。请在删除前确认。</p>
+        </div>
+
+        <div class="frosted-card">
+            <strong>Q: 支持哪些设备？</strong>
+            <p>A: 支持 iOS 16.0 及以上版本的 iPhone 和 iPad。</p>
+        </div>
+
+        <h2>联系我们</h2>
+        <div class="frosted-card contact-card">
+            <p>如需帮助或反馈，请发送邮件至：<a href="mailto:kunnengshen@outlook.com">kunnengshen@outlook.com</a></p>
+        </div>
+    </div>
+</body>
+</html>
