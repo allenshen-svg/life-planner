@@ -26,23 +26,54 @@ const MOODS = [
   { key: 'love',    emoji: '🥰', label: t('mood.love') },
 ];
 
-const ALL_TAGS = ['读书','健身','跑步','约会','工作','学习','旅行','购物','美食','电影','音乐','游戏','家务','发呆','加班','聚餐'];
+const ALL_TAGS = ['reading','fitness','running','dating','work','study','travel','shopping','food','movie','music','gaming','housework','relax','overtime','dinner_party'].map(k => t('tag.' + k));
+
+// ─── Activity key → category mapping ───
+const ACT_CAT = {
+  visit_exhibition:'other', eat_hotpot:'food', walk_dog:'other', stroll_park:'other',
+  running:'exercise', drink_coffee:'food', watch_movie:'other', camping:'travel',
+  explore_shops:'food', cycling:'exercise', eat_bbq:'food', eat_japanese:'food',
+  eat_western:'food', afternoon_tea:'food', eat_dimsum:'food', eat_sichuan:'food',
+  eat_cantonese:'food', eat_dessert:'food', drink_milktea:'food',
+  go_mall:'shopping', go_supermarket:'shopping', go_market:'shopping',
+  buy_clothes:'shopping', go_bookstore:'shopping', go_flower_market:'shopping',
+  watch_show:'other', concert:'other', watch_drama:'other',
+  visit_museum:'other', visit_gallery:'other', watch_standup:'other',
+  karaoke:'other', escape_room:'other', script_murder:'other',
+  gym:'exercise', swimming:'exercise', badminton:'exercise', basketball:'exercise',
+  hiking:'exercise', yoga:'exercise', skateboarding:'exercise',
+  rock_climbing:'exercise', frisbee:'exercise',
+  picnic:'travel', fishing:'other', walking:'exercise',
+  ride_around:'other', watch_sunset:'other', fly_kite:'other',
+  friends_dinner:'social', family_gathering:'social', dating:'social',
+  meet_client:'work', team_building:'social', house_party:'social',
+  haircut:'other', see_doctor:'other', car_wash:'other', moving:'other',
+  housework:'other', send_package:'other', get_documents:'other',
+  attend_class:'work', self_study:'work', meeting:'work', interview:'work',
+  code:'work', draw:'work', play_piano:'work', calligraphy:'work',
+  take_train:'travel', take_flight:'travel', road_trip:'travel',
+  visit_scenic:'travel', hot_spring:'travel', stay_bnb:'travel',
+};
+function tAct(key) { return t('act.' + key); }
 
 // ─── 预设活动（分类） ───
 const ACTIVITY_GROUPS = [
-  { label: '🔥 热门', items: ['逛展览','吃火锅','遛狗','逛公园','跑步','喝咖啡','看电影','露营','探店打卡','骑行'] },
-  { label: '🍜 美食', items: ['吃火锅','吃烧烤','喝咖啡','吃日料','吃西餐','喝下午茶','吃早茶','吃川菜','吃粤菜','探店打卡','吃甜品','喝奶茶'] },
-  { label: '🛍 购物', items: ['逛商场','逛超市','逛市集','买衣服','逛书店','逛花市'] },
-  { label: '🎬 文娱', items: ['看电影','逛展览','看演出','听音乐会','看话剧','逛博物馆','逛美术馆','看脱口秀','唱K','密室逃脱','剧本杀'] },
-  { label: '🏃 运动', items: ['跑步','健身','游泳','打羽毛球','打篮球','骑行','爬山','瑜伽','滑板','攀岩','飞盘'] },
-  { label: '🌳 户外', items: ['逛公园','野餐','露营','钓鱼','遛狗','散步','骑车兜风','看日落','放风筝'] },
-  { label: '👫 社交', items: ['朋友聚餐','家庭聚会','约会','见客户','团建','轰趴'] },
-  { label: '🏠 生活', items: ['理发','看医生','洗车','搬家','做家务','寄快递','办证件'] },
-  { label: '📚 学习', items: ['上课','自习','开会','面试','写代码','画画','弹琴','练字'] },
-  { label: '✈️ 旅行', items: ['坐高铁','坐飞机','自驾游','逛景点','泡温泉','住民宿'] },
+  { label: '🔥 ' + t('actg.popular'), items: ['visit_exhibition','eat_hotpot','walk_dog','stroll_park','running','drink_coffee','watch_movie','camping','explore_shops','cycling'].map(tAct) },
+  { label: '🍜 ' + t('actg.food'), items: ['eat_hotpot','eat_bbq','drink_coffee','eat_japanese','eat_western','afternoon_tea','eat_dimsum','eat_sichuan','eat_cantonese','explore_shops','eat_dessert','drink_milktea'].map(tAct) },
+  { label: '🛍 ' + t('actg.shopping'), items: ['go_mall','go_supermarket','go_market','buy_clothes','go_bookstore','go_flower_market'].map(tAct) },
+  { label: '🎬 ' + t('actg.entertainment'), items: ['watch_movie','visit_exhibition','watch_show','concert','watch_drama','visit_museum','visit_gallery','watch_standup','karaoke','escape_room','script_murder'].map(tAct) },
+  { label: '🏃 ' + t('actg.sports'), items: ['running','gym','swimming','badminton','basketball','cycling','hiking','yoga','skateboarding','rock_climbing','frisbee'].map(tAct) },
+  { label: '🌳 ' + t('actg.outdoors'), items: ['stroll_park','picnic','camping','fishing','walk_dog','walking','ride_around','watch_sunset','fly_kite'].map(tAct) },
+  { label: '👫 ' + t('actg.social'), items: ['friends_dinner','family_gathering','dating','meet_client','team_building','house_party'].map(tAct) },
+  { label: '🏠 ' + t('actg.life'), items: ['haircut','see_doctor','car_wash','moving','housework','send_package','get_documents'].map(tAct) },
+  { label: '📚 ' + t('actg.study'), items: ['attend_class','self_study','meeting','interview','code','draw','play_piano','calligraphy'].map(tAct) },
+  { label: '✈️ ' + t('actg.travel'), items: ['take_train','take_flight','road_trip','visit_scenic','hot_spring','stay_bnb'].map(tAct) },
 ];
 // flat list for search
 const ACTIVITIES = ACTIVITY_GROUPS.flatMap(g => g.items);
+// Reverse lookup: translated name → category
+const _actCatByName = {};
+for (const [k, c] of Object.entries(ACT_CAT)) { _actCatByName[tAct(k)] = c; }
 
 // ─── 城市列表 ───
 const CITIES = [
@@ -378,22 +409,22 @@ const app = createApp({
 
     // ─── Theme Color Picker ───
     const themeColors = [
-      { value: '#c59a5f', label: '琥珀' },
-      { value: '#7cb8ca', label: '天蓝' },
-      { value: '#a494c4', label: '薰衣草' },
-      { value: '#e08888', label: '玫瑰' },
-      { value: '#7aad8b', label: '墨绿' },
-      { value: '#5ab8c7', label: '青碧' },
-      { value: '#c99aaa', label: '桃粉' },
-      { value: '#8a9ab0', label: '石墨' },
+      { value: '#c59a5f', label: t('color.amber') },
+      { value: '#7cb8ca', label: t('color.sky_blue') },
+      { value: '#a494c4', label: t('color.lavender') },
+      { value: '#e08888', label: t('color.rose') },
+      { value: '#7aad8b', label: t('color.dark_green') },
+      { value: '#5ab8c7', label: t('color.teal') },
+      { value: '#c99aaa', label: t('color.peach') },
+      { value: '#8a9ab0', label: t('color.graphite') },
     ];
     const bgThemes = [
-      { value: 'coffee', label: '咖啡', emoji: '☕' },
-      { value: 'cloud',  label: '白云', emoji: '☁️' },
-      { value: 'sky',    label: '星空', emoji: '🌌' },
-      { value: 'forest', label: '森林', emoji: '🌲' },
-      { value: 'rose',   label: '玫瑰', emoji: '🌹' },
-      { value: 'lavender', label: '薰衣草', emoji: '💜' },
+      { value: 'coffee', label: t('bg.coffee'), emoji: '☕' },
+      { value: 'cloud',  label: t('bg.cloud'), emoji: '☁️' },
+      { value: 'sky',    label: t('bg.sky'), emoji: '🌌' },
+      { value: 'forest', label: t('bg.forest'), emoji: '🌲' },
+      { value: 'rose',   label: t('bg.rose'), emoji: '🌹' },
+      { value: 'lavender', label: t('bg.lavender'), emoji: '💜' },
     ];
     const themeColor = ref(localStorage.getItem('lp_theme') || '#c59a5f');
     const bgTheme = ref(localStorage.getItem('lp_bg') || 'coffee');
@@ -420,39 +451,7 @@ const app = createApp({
     watch(aiProvider, v => localStorage.setItem('lp_aiProvider', v));
 
     // ─── Daily Quote + User Motto ───
-    const DAILY_QUOTES = [
-      { text: '生活不是等待暴风雨过去，而是学会在雨中跳舞。', author: '维维安·格林' },
-      { text: '种一棵树最好的时间是十年前，其次是现在。', author: '中国谚语' },
-      { text: '不要因为走得太远，而忘记为什么出发。', author: '纪伯伦' },
-      { text: '世界上只有一种英雄主义，就是看清生活的真相后依然热爱它。', author: '罗曼·罗兰' },
-      { text: '把每一天当作生命的最后一天来过，总有一天你会发现自己是对的。', author: '乔布斯' },
-      { text: '你要做一个不动声色的大人了，不准情绪化。', author: '村上春树' },
-      { text: '我们终此一生，就是要摆脱他人的期待，找到真正的自己。', author: '伍绮诗' },
-      { text: '人生就像骑自行车，要保持平衡就得不断前进。', author: '爱因斯坦' },
-      { text: '所有伟大的行为和思想，都有一个微不足道的开始。', author: '加缪' },
-      { text: '你无法改变风的方向，但你可以调整帆的角度。', author: '吉米·迪恩' },
-      { text: '生命中最困难的时刻，也许正是转变的时刻。', author: '毕淑敏' },
-      { text: '一个人的价值，在于他贡献了什么，而不在于他能获得什么。', author: '爱因斯坦' },
-      { text: '当你觉得为时已晚的时候，恰恰是最早的时候。', author: '哈佛校训' },
-      { text: '每一个不曾起舞的日子，都是对生命的辜负。', author: '尼采' },
-      { text: '悲观者在每个机会中看到困难，乐观者在每个困难中看到机会。', author: '丘吉尔' },
-      { text: '做你害怕做的事情，然后你会发现，不过如此。', author: '拉尔夫·爱默生' },
-      { text: '日拱一卒，功不唐捐。', author: '曾国藩' },
-      { text: '既然选择了远方，便只顾风雨兼程。', author: '汪国真' },
-      { text: '永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。', author: '马克·吐温' },
-      { text: '我不去想是否能够成功，既然选择了远方，便只顾风雨兼程。', author: '汪国真' },
-      { text: '生活就像海洋，只有意志坚强的人才能到达彼岸。', author: '马克思' },
-      { text: '不要去追一匹马，用追马的时间种草。', author: '丰子恺' },
-      { text: '纵有疾风起，人生不言弃。', author: '保尔·瓦雷里' },
-      { text: '任何值得到达的地方都没有捷径。', author: '贝弗利·希尔斯' },
-      { text: '心之所向，素履以往。', author: '七堇年' },
-      { text: '只有流过血的手指，才能弹出世间的绝唱。', author: '泰戈尔' },
-      { text: '努力不一定成功，但放弃一定失败。', author: '李嘉诚' },
-      { text: '你不能控制风向，但你可以调整风帆。', author: '本杰明·富兰克林' },
-      { text: '自律给我自由。', author: 'Keep 标语' },
-      { text: '星光不问赶路人，时光不负有心人。', author: '大冰' },
-      { text: '知不足而奋进，望远山而前行。', author: '左传' },
-    ];
+    const DAILY_QUOTES = Array.from({length: 31}, (_, i) => ({ text: t('quote.' + i), author: t('quote.' + i + 'a') }));
     function getTodayQuote() {
       const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
       return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
@@ -477,7 +476,7 @@ const app = createApp({
 
     // ─── Plan ───
     const planDate = ref(today());
-    const planCity = ref(localStorage.getItem('lp_city') || '上海');
+    const planCity = ref(localStorage.getItem('lp_city') || t('default.city'));
     const plans = ref([]);
     const showPlanModal = ref(false);
     const editingPlan = ref(null);
@@ -497,13 +496,13 @@ const app = createApp({
     const PLAN_EMOJIS = ['📝','☀️','📖','🍜','🏃','🎬','💼','🎯','🧘','🎨','🎵','✈️','🛒','💪','☕','🎮','📸','🌿','🐾','💡'];
     const PLAN_COLORS = [
       { name: t('color.none'), value: '' },
-      { name: '琥珀', value: '#c59a5f' },
-      { name: '翡翠', value: '#5f8a6e' },
-      { name: '天蓝', value: '#6a9cad' },
-      { name: '玫瑰', value: '#c26e6e' },
-      { name: '紫藤', value: '#8a7ba8' },
-      { name: '珊瑚', value: '#e08870' },
-      { name: '薄荷', value: '#5fbda0' },
+      { name: t('color.amber'), value: '#c59a5f' },
+      { name: t('color.emerald'), value: '#5f8a6e' },
+      { name: t('color.sky_blue'), value: '#6a9cad' },
+      { name: t('color.rose'), value: '#c26e6e' },
+      { name: t('color.wisteria'), value: '#8a7ba8' },
+      { name: t('color.coral'), value: '#e08870' },
+      { name: t('color.mint'), value: '#5fbda0' },
     ];
 
     function emptyPlanForm() {
@@ -512,43 +511,43 @@ const app = createApp({
     }
     // Widget types: 'pomodoro' | 'counter' | 'micronote'
     const PLAN_WIDGETS = [
-      { key: 'pomodoro', icon: '🍅', label: '番茄钟', desc: '专注计时' },
-      { key: 'counter',  icon: '📊', label: '打卡计数', desc: '累计次数' },
-      { key: 'micronote',icon: '📝', label: '微日记', desc: '简短记录' },
+      { key: 'pomodoro', icon: '🍅', label: t('widget.pomodoro'), desc: t('widget.pomodoro_desc') },
+      { key: 'counter',  icon: '📊', label: t('widget.counter'), desc: t('widget.counter_desc') },
+      { key: 'micronote',icon: '📝', label: t('widget.micronote'), desc: t('widget.micronote_desc') },
     ];
 
     // ─── Plan Templates ───
     const showTemplates = ref(false);
     const PLAN_TEMPLATES = [
-      { id: 'morning', cover: '🌅', title: '21天早起打卡', desc: '养成早起习惯，开启高效一天', color: '#c59a5f', days: 21,
+      { id: 'morning', cover: '🌅', title: t('tpl.morning.title'), desc: t('tpl.morning.desc'), color: '#c59a5f', days: 21,
         tasks: [
-          { time_start: '06:30', time_end: '06:45', title: '☀️ 早起洗漱', category: 'other', emoji: '☀️', widgets: ['counter'] },
-          { time_start: '06:45', time_end: '07:00', title: '🧘 晨间冒想', category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
-          { time_start: '07:00', time_end: '07:30', title: '🍳 健康早餐', category: 'food', emoji: '🍳' },
+          { time_start: '06:30', time_end: '06:45', title: t('tpl.morning.t1'), category: 'other', emoji: '☀️', widgets: ['counter'] },
+          { time_start: '06:45', time_end: '07:00', title: t('tpl.morning.t2'), category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
+          { time_start: '07:00', time_end: '07:30', title: t('tpl.morning.t3'), category: 'food', emoji: '🍳' },
         ]},
-      { id: 'fitness', cover: '💪', title: '30天马甲线养成', desc: '科学训练+饮食记录', color: '#5f8a6e', days: 30,
+      { id: 'fitness', cover: '💪', title: t('tpl.fitness.title'), desc: t('tpl.fitness.desc'), color: '#5f8a6e', days: 30,
         tasks: [
-          { time_start: '07:00', time_end: '07:30', title: '🏃 晨跑热身', category: 'exercise', emoji: '🏃' },
-          { time_start: '18:00', time_end: '19:00', title: '💪 核心训练', category: 'exercise', emoji: '💪', widgets: ['pomodoro','counter'] },
-          { time_start: '19:30', time_end: '20:00', title: '🥗 轻食晚餐', category: 'food', emoji: '🥗', widgets: ['micronote'] },
+          { time_start: '07:00', time_end: '07:30', title: t('tpl.fitness.t1'), category: 'exercise', emoji: '🏃' },
+          { time_start: '18:00', time_end: '19:00', title: t('tpl.fitness.t2'), category: 'exercise', emoji: '💪', widgets: ['pomodoro','counter'] },
+          { time_start: '19:30', time_end: '20:00', title: t('tpl.fitness.t3'), category: 'food', emoji: '🥗', widgets: ['micronote'] },
         ]},
-      { id: 'weekend', cover: '🌟', title: '打工人周末回血', desc: '充实而放松的周末', color: '#6a9cad', days: 2,
+      { id: 'weekend', cover: '🌟', title: t('tpl.weekend.title'), desc: t('tpl.weekend.desc'), color: '#6a9cad', days: 2,
         tasks: [
-          { time_start: '09:00', time_end: '10:00', title: '☕ 慢悠悠早餝咖啡', category: 'food', emoji: '☕' },
-          { time_start: '10:30', time_end: '12:00', title: '📖 读一本好书', category: 'work', emoji: '📖', widgets: ['pomodoro','micronote'] },
-          { time_start: '14:00', time_end: '17:00', title: '🌿 户外散步/探店', category: 'travel', emoji: '🌿' },
-          { time_start: '19:00', time_end: '21:00', title: '🎬 电影之夜', category: 'other', emoji: '🎬' },
+          { time_start: '09:00', time_end: '10:00', title: t('tpl.weekend.t1'), category: 'food', emoji: '☕' },
+          { time_start: '10:30', time_end: '12:00', title: t('tpl.weekend.t2'), category: 'work', emoji: '📖', widgets: ['pomodoro','micronote'] },
+          { time_start: '14:00', time_end: '17:00', title: t('tpl.weekend.t3'), category: 'travel', emoji: '🌿' },
+          { time_start: '19:00', time_end: '21:00', title: t('tpl.weekend.t4'), category: 'other', emoji: '🎬' },
         ]},
-      { id: 'reading', cover: '📚', title: '30天读完三本书', desc: '每天阅读+笔记，每周复盘', color: '#8a7ba8', days: 30,
+      { id: 'reading', cover: '📚', title: t('tpl.reading.title'), desc: t('tpl.reading.desc'), color: '#8a7ba8', days: 30,
         tasks: [
-          { time_start: '08:00', time_end: '09:00', title: '📖 晨读 30页', category: 'work', emoji: '📖', widgets: ['pomodoro','counter'] },
-          { time_start: '21:00', time_end: '21:30', title: '✍️ 读书笔记', category: 'work', emoji: '✍️', widgets: ['micronote'] },
+          { time_start: '08:00', time_end: '09:00', title: t('tpl.reading.t1'), category: 'work', emoji: '📖', widgets: ['pomodoro','counter'] },
+          { time_start: '21:00', time_end: '21:30', title: t('tpl.reading.t2'), category: 'work', emoji: '✍️', widgets: ['micronote'] },
         ]},
-      { id: 'nosleep', cover: '🌙', title: '30天告别熬夜', desc: '渐进式调整作息', color: '#e08870', days: 30,
+      { id: 'nosleep', cover: '🌙', title: t('tpl.nosleep.title'), desc: t('tpl.nosleep.desc'), color: '#e08870', days: 30,
         tasks: [
-          { time_start: '21:30', time_end: '22:00', title: '📵 放下手机', category: 'other', emoji: '📵' },
-          { time_start: '22:00', time_end: '22:20', title: '🧘 睡前拉伸/冒想', category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
-          { time_start: '22:30', time_end: '06:30', title: '😴 睡眠时间', category: 'other', emoji: '😴' },
+          { time_start: '21:30', time_end: '22:00', title: t('tpl.nosleep.t1'), category: 'other', emoji: '📵' },
+          { time_start: '22:00', time_end: '22:20', title: t('tpl.nosleep.t2'), category: 'exercise', emoji: '🧘', widgets: ['pomodoro'] },
+          { time_start: '22:30', time_end: '06:30', title: t('tpl.nosleep.t3'), category: 'other', emoji: '😴' },
         ]},
     ];
 
@@ -630,37 +629,41 @@ const app = createApp({
 
     // ─── Quick Action Cards ───
     const QUICK_ACTIONS = [
-      { emoji: '📈', title: '今日投资计划', cat: 'work', subs: ['看盘复盘','研究个股','调整仓位','学习财报','定投基金','记录交易笔记','阅读研报','模拟交易'] },
-      { emoji: '🏃', title: '跑步', cat: 'exercise', subs: ['晨跑3公里','夜跑5公里','公园慢跑','操场间歇跑','跑步机','马拉松训练','跑后拉伸','跑步打卡'] },
-      { emoji: '💪', title: '健身', cat: 'exercise', subs: ['胸肌训练','背部训练','腿部训练','核心训练','手臂训练','HIIT燃脂','拉伸放松','有氧运动'] },
-      { emoji: '📚', title: '读书学习', cat: 'work', subs: ['读书1小时','背单词','刷题','看网课','写笔记','练习编程','考证复习','听播客'] },
-      { emoji: '🍜', title: '约饭', cat: 'food', subs: ['火锅','烧烤','日料','东南亚菜','西餐','川菜','粤菜','韩餐','自助餐','小龙虾','下午茶','深夜食堂'] },
-      { emoji: '☕', title: '喝咖啡', cat: 'food', subs: ['美式咖啡','拿铁','手冲咖啡','探店打卡','咖啡+读书','咖啡+办公','约人喝咖啡','尝试新品'] },
-      { emoji: '🎬', title: '看电影', cat: 'other', subs: ['院线新片','经典老片','纪录片','动画电影','漫威/DC','文艺片','恐怖片','喜剧片','情侣约片','朋友观影'] },
-      { emoji: '🧘', title: '瑜伽冥想', cat: 'exercise', subs: ['晨间冥想','睡前冥想','瑜伽30分钟','拉伸瑜伽','流瑜伽','阴瑜伽','呼吸练习','正念训练'] },
+      { emoji: '📈', title: t('qa.invest'), cat: 'work', subs: ['market_review','stock_research','adjust_position','learn_finance','dca_fund','trade_notes','read_reports','sim_trade'].map(k => t('sub.' + k)) },
+      { emoji: '🏃', title: t('act.running'), cat: 'exercise', subs: ['morning_3k','night_5k','park_jog','interval','treadmill','marathon_train','post_run_stretch','run_checkin'].map(k => t('sub.' + k)) },
+      { emoji: '💪', title: t('act.gym'), cat: 'exercise', subs: ['chest','back','legs','core','arms','hiit','stretch','cardio'].map(k => t('sub.' + k)) },
+      { emoji: '📚', title: t('qa.study'), cat: 'work', subs: ['read_1h','vocab','problems','watch_course','take_notes','practice_code','cert_study','podcast'].map(k => t('sub.' + k)) },
+      { emoji: '🍜', title: t('qa.eat_out'), cat: 'food', subs: ['qa_hotpot','qa_bbq','qa_japanese','qa_southeast_asian','qa_western','qa_sichuan','qa_cantonese','qa_korean','qa_buffet','qa_crayfish','qa_afternoon_tea','qa_late_night'].map(k => t('sub.' + k)) },
+      { emoji: '☕', title: t('act.drink_coffee'), cat: 'food', subs: ['americano','latte','pour_over','coffee_explore','coffee_read','coffee_work','coffee_meet','try_new'].map(k => t('sub.' + k)) },
+      { emoji: '🎬', title: t('act.watch_movie'), cat: 'other', subs: ['new_release','classic','documentary','animation','marvel_dc','arthouse','horror','comedy','couple_movie','friends_movie'].map(k => t('sub.' + k)) },
+      { emoji: '🧘', title: t('qa.yoga_meditation'), cat: 'exercise', subs: ['am_meditation','pm_meditation','yoga_30','stretch_yoga','flow_yoga','yin_yoga','breathing','mindfulness'].map(k => t('sub.' + k)) },
     ];
     const quickActionSubs = ref(null); // current sub-activities from quick action
 
     // Map activity names to sub-activities for drill-down
-    const ACTIVITY_SUBS = {
-      '吃火锅': ['重庆老火锅','潮汕牛肉锅','铜锅涮肉','椰子鸡','番茄锅','菌汤锅','自助火锅','海底捞'],
-      '吃烧烤': ['东北烧烤','日式烧鸟','韩式烤肉','大排档烧烤','自助烤肉','露天BBQ'],
-      '吃日料': ['寿司','拉面','居酒屋','刺身','天妇罗','烤鳗鱼','日式烤肉','omakase'],
-      '吃西餐': ['意大利面','牛排','法餐','披萨','汉堡','brunch','西班牙菜','墨西哥菜'],
-      '吃川菜': ['水煮鱼','麻辣香锅','串串香','冒菜','钵钵鸡','夫妻肺片','回锅肉'],
-      '吃粤菜': ['早茶','烧腊','煲仔饭','白切鸡','肠粉','虾饺','叉烧'],
-      '喝下午茶': ['英式下午茶','甜品店','蛋糕','奶茶','冰淇淋','探店打卡'],
-      '看电影': ['院线新片','经典老片','纪录片','动画电影','漫威/DC','文艺片','恐怖片','喜剧片'],
-      '逛展览': ['美术展','摄影展','当代艺术','科技展','设计展','沉浸式体验','画廊'],
-      '跑步': ['晨跑3公里','夜跑5公里','公园慢跑','操场间歇跑','跑步机','马拉松训练'],
-      '健身': ['胸肌训练','背部训练','腿部训练','核心训练','HIIT燃脂','拉伸放松','有氧运动'],
-      '游泳': ['自由泳','蛙泳','仰泳','蝶泳','水中健身','游泳打卡'],
-      '爬山': ['近郊徒步','城市绿道','登山步道','夜爬','周末远足'],
-      '逛公园': ['散步','野餐','放风筝','拍照','晒太阳','看花'],
-      '露营': ['帐篷露营','车顶露营','烧烤露营','星空露营','湖边露营'],
-      '喝咖啡': ['美式咖啡','拿铁','手冲咖啡','探店打卡','咖啡+读书','咖啡+办公'],
-      '朋友聚餐': ['火锅局','烧烤局','KTV','桌游','剧本杀','密室逃脱','轰趴'],
+    const _SUBS_RAW = {
+      eat_hotpot: ['chongqing_hotpot','chaoshan_beef','copper_pot','coconut_chicken','tomato_pot','mushroom_pot','buffet_hotpot','haidilao'],
+      eat_bbq: ['northeast_bbq','yakitori','korean_bbq','food_stall_bbq','buffet_bbq','outdoor_bbq'],
+      eat_japanese: ['sushi','ramen','izakaya','sashimi','tempura','grilled_eel','yakiniku','omakase'],
+      eat_western: ['pasta','steak','french','pizza','burger','brunch','spanish','mexican'],
+      eat_sichuan: ['boiled_fish','mala_pot','chuanchuan','maocai','boboji','couple_slices','twice_cooked_pork'],
+      eat_cantonese: ['morning_tea','roast_meats','claypot_rice','white_cut_chicken','rice_noodle_rolls','shrimp_dumpling','char_siu'],
+      afternoon_tea: ['british_tea','dessert_shop','cake','milktea','ice_cream','explore_shop'],
+      watch_movie: ['new_release','classic','documentary','animation','marvel_dc','arthouse','horror','comedy'],
+      visit_exhibition: ['art_show','photo_show','contemporary','tech_show','design_show','immersive','gallery'],
+      running: ['morning_3k','night_5k','park_jog','interval','treadmill','marathon_train'],
+      gym: ['chest','back','legs','core','hiit','stretch','cardio'],
+      swimming: ['freestyle','breaststroke','backstroke','butterfly','aqua_fit','swim_checkin'],
+      hiking: ['suburban','greenway','trail','night_hike','weekend_hike'],
+      stroll_park: ['park_walk','park_picnic','park_kite','park_photo','sunbathe','see_flowers'],
+      camping: ['tent','rooftop','bbq_camp','stargazing','lakeside'],
+      drink_coffee: ['americano','latte','pour_over','coffee_explore','coffee_read','coffee_work'],
+      friends_dinner: ['hotpot_party','bbq_party','ktv','board_games','script_play','escape_play','party'],
     };
+    const ACTIVITY_SUBS = {};
+    for (const [k, subs] of Object.entries(_SUBS_RAW)) {
+      ACTIVITY_SUBS[tAct(k)] = subs.map(s => t('sub.' + s));
+    }
 
     function quickAdd(action) {
       planForm.value = { ...emptyPlanForm(), date: planDate.value, city: planCity.value, title: '', category: action.cat };
@@ -683,22 +686,13 @@ const app = createApp({
       // If this activity has sub-activities, show drill-down
       if (ACTIVITY_SUBS[a] && !quickActionSubs.value) {
         quickActionSubs.value = { emoji: '', title: a, items: ACTIVITY_SUBS[a] };
-        planForm.value.category = 'other';
-        // auto-set category
-        const catMap = { '吃':'food','喝':'food','探店':'food','逛商':'shopping','逛超':'shopping','逛市':'shopping','买':'shopping','逛书':'shopping','逛花':'shopping','看电':'other','逛展':'other','看演':'other','听':'other','看话':'other','逛博':'other','逛美':'other','看脱':'other','唱':'other','密室':'other','剧本':'other','跑步':'exercise','健身':'exercise','游泳':'exercise','打':'exercise','骑行':'exercise','爬山':'exercise','瑜伽':'exercise','滑板':'exercise','攀岩':'exercise','飞盘':'exercise','逛公':'other','野餐':'travel','露营':'travel','钓鱼':'other','遛狗':'other','散步':'exercise','朋友':'social','家庭':'social','约会':'social','见客':'work','团建':'social','轰趴':'social','上课':'work','自习':'work','开会':'work','面试':'work','写代':'work','坐':'travel','自驾':'travel','逛景':'travel','泡温':'travel','住民':'travel' };
-        for (const [prefix, cat] of Object.entries(catMap)) {
-          if (a.startsWith(prefix)) { planForm.value.category = cat; break; }
-        }
+        planForm.value.category = _actCatByName[a] || 'other';
         return;
       }
       planForm.value.title = a;
       activityQuery.value = a;
       showActivityDropdown.value = false;
-      // auto-set category
-      const catMap = { '吃':'food','喝':'food','探店':'food','逛商':'shopping','逛超':'shopping','逛市':'shopping','买':'shopping','逛书':'shopping','逛花':'shopping','看电':'other','逛展':'other','看演':'other','听':'other','看话':'other','逛博':'other','逛美':'other','看脱':'other','唱':'other','密室':'other','剧本':'other','跑步':'exercise','健身':'exercise','游泳':'exercise','打':'exercise','骑行':'exercise','爬山':'exercise','瑜伽':'exercise','滑板':'exercise','攀岩':'exercise','飞盘':'exercise','逛公':'other','野餐':'travel','露营':'travel','钓鱼':'other','遛狗':'other','散步':'exercise','朋友':'social','家庭':'social','约会':'social','见客':'work','团建':'social','轰趴':'social','上课':'work','自习':'work','开会':'work','面试':'work','写代':'work','坐':'travel','自驾':'travel','逛景':'travel','泡温':'travel','住民':'travel' };
-      for (const [prefix, cat] of Object.entries(catMap)) {
-        if (a.startsWith(prefix)) { planForm.value.category = cat; break; }
-      }
+      planForm.value.category = _actCatByName[a] || 'other';
     }
 
     // ─── Address autocomplete ───
@@ -711,7 +705,7 @@ const app = createApp({
       const val = addressQuery.value;
       planForm.value.location = val;
       if (!val || val.length < 1) { addressSuggestions.value = []; showAddressDropdown.value = false; return; }
-      const city = planForm.value.city || '上海';
+      const city = planForm.value.city || t('default.city');
       const landmarks = getCityLandmarks(city);
       const matches = landmarks.filter(l => l.includes(val));
       addressSuggestions.value = matches.slice(0, 8);
@@ -738,8 +732,8 @@ const app = createApp({
     });
 
     const next7Days = computed(() => {
-      const labels = ['今天', '明天', '后天'];
-      const weekDays = ['周日','周一','周二','周三','周四','周五','周六'];
+      const labels = [t('date.today'), t('date.tomorrow'), t('date.after')];
+      const weekDays = [t('week.sun'),t('week.mon'),t('week.tue'),t('week.wed'),t('week.thu'),t('week.fri'),t('week.sat')];
       const res = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date();
@@ -757,14 +751,14 @@ const app = createApp({
       let all = lsLoad('lp_plans');
       // Seed example plans for first-time users
       if (!all.length && !localStorage.getItem('lp_seeded')) {
-        const t = today();
+        const td = today();
         const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return toLocalDate(d); })();
         all = [
-          { id: 'demo_1', date: t, time_start: '07:30', time_end: '08:00', title: '☀️ 晨间冥想', location: '', city: '', category: 'health', notes: '示例：每天花几分钟冥想，开启美好一天', done: false },
-          { id: 'demo_2', date: t, time_start: '09:00', time_end: '11:30', title: '📖 读书学习', location: '图书馆', city: '', category: 'study', notes: '示例：记录你的学习计划，完成后点 ⬜ 打勾', done: false },
-          { id: 'demo_3', date: t, time_start: '12:00', time_end: '13:00', title: '🍜 和朋友约饭', location: '新天地', city: '', category: 'food', notes: '示例：记录聚餐、约会等社交活动', done: false },
-          { id: 'demo_4', date: t, time_start: '18:00', time_end: '19:00', title: '🏃 夜跑5公里', location: '世纪公园', city: '', category: 'exercise', notes: '示例：运动计划，完成后获得 EXP 奖励！', done: false },
-          { id: 'demo_5', date: tomorrow, time_start: '14:00', time_end: '16:00', title: '🎬 看电影', location: '万达影城', city: '', category: 'entertainment', notes: '示例：明天的计划也可以提前安排', done: false },
+          { id: 'demo_1', date: td, time_start: '07:30', time_end: '08:00', title: t('demo.1.title'), location: '', city: '', category: 'health', notes: t('demo.1.notes'), done: false },
+          { id: 'demo_2', date: td, time_start: '09:00', time_end: '11:30', title: t('demo.2.title'), location: t('demo.2.location'), city: '', category: 'study', notes: t('demo.2.notes'), done: false },
+          { id: 'demo_3', date: td, time_start: '12:00', time_end: '13:00', title: t('demo.3.title'), location: t('demo.3.location'), city: '', category: 'food', notes: t('demo.3.notes'), done: false },
+          { id: 'demo_4', date: td, time_start: '18:00', time_end: '19:00', title: t('demo.4.title'), location: t('demo.4.location'), city: '', category: 'exercise', notes: t('demo.4.notes'), done: false },
+          { id: 'demo_5', date: tomorrow, time_start: '14:00', time_end: '16:00', title: t('demo.5.title'), location: t('demo.5.location'), city: '', category: 'entertainment', notes: t('demo.5.notes'), done: false },
         ];
         lsSave('lp_plans', all);
         localStorage.setItem('lp_seeded', '1');
@@ -774,7 +768,7 @@ const app = createApp({
 
     async function savePlan() {
       const f = planForm.value;
-      if (!f.title) return alert('请选择或输入活动');
+      if (!f.title) return alert(t('msg.no_title'));
       planCity.value = f.city || planCity.value;
       const all = lsLoad('lp_plans');
       if (editingPlan.value) {
@@ -803,7 +797,7 @@ const app = createApp({
     }
 
     async function deletePlan(id) {
-      if (!confirm('删除这个计划？')) return;
+      if (!confirm(t('msg.del_plan'))) return;
       const all = lsLoad('lp_plans').filter(p => p.id !== id);
       lsSave('lp_plans', all);
       await loadPlans();
@@ -895,23 +889,23 @@ const app = createApp({
       const skipped = dayPlans.filter(p => p.skipped).length;
       const active = total - skipped;
       const stars = done >= 5 ? 3 : done >= 3 ? 2 : done >= 1 ? 1 : 0;
-      const titles = ['还没开始哦', '初露锋芒 ✨', '势不可挡 🔥', '超级达人 🏆'];
+      const titles = [t('reward.0'), t('reward.1'), t('reward.2'), t('reward.3')];
       return { total: active, done, stars, title: titles[stars] };
     });
 
     // ─── Share ───
     async function sharePlan(p) {
-      const text = `📌 ${p.date} ${p.time_start}-${p.time_end}\n${p.title}${p.location ? ' @ ' + p.location : ''}${p.city ? ' · ' + p.city : ''}\n\n— 来自「时光记」`;
+      const text = `📌 ${p.date} ${p.time_start}-${p.time_end}\n${p.title}${p.location ? ' @ ' + p.location : ''}${p.city ? ' · ' + p.city : ''}\n\n— ${t('app.title')}`;
       if (navigator.share) {
         try {
-          await navigator.share({ title: '时光记 · 计划分享', text });
+          await navigator.share({ title: t('app.title'), text });
         } catch(e) {}
       } else {
         try {
           await navigator.clipboard.writeText(text);
-          alert('已复制到剪贴板，可以发给朋友啦');
+          alert(t('msg.copied'));
         } catch(e) {
-          prompt('复制以下内容分享给朋友：', text);
+          prompt(t('msg.copy_prompt'), text);
         }
       }
     }
@@ -933,7 +927,7 @@ const app = createApp({
 
     async function saveDiary() {
       const f = diaryForm.value;
-      if (!f.content) return alert('请写点什么吧');
+      if (!f.content) return alert(t('msg.no_content'));
       const all = lsLoad('lp_diary');
       if (editingDiary.value) {
         const idx = all.findIndex(e => e.id === editingDiary.value);
@@ -957,7 +951,7 @@ const app = createApp({
     }
 
     async function deleteDiary(id) {
-      if (!confirm('删除这条日记？')) return;
+      if (!confirm(t('msg.del_diary'))) return;
       const all = lsLoad('lp_diary').filter(e => e.id !== id);
       lsSave('lp_diary', all);
       await loadDiary();
@@ -1422,7 +1416,7 @@ const app = createApp({
     let _fromHotEvent = false;
     function addHotEvent(ev) {
       const evDate = parseEventDate(ev.date);
-      const notes = [`${ev.tag} · ${ev.date}`, ev.addr ? `${t('hot.addr')}: ${ev.addr}` : '', ev.route ? `${t('hot.transit')}: ${ev.route}` : '', ev.docs ? `证件: ${ev.docs}` : '', ev.tips ? `提示: ${ev.tips}` : ''].filter(Boolean).join('\n');
+      const notes = [`${ev.tag} · ${ev.date}`, ev.addr ? `${t('hot.addr')}: ${ev.addr}` : '', ev.route ? `${t('hot.transit')}: ${ev.route}` : '', ev.docs ? `${t('hot.docs_label')}: ${ev.docs}` : '', ev.tips ? `${t('hot.tips_label')}: ${ev.tips}` : ''].filter(Boolean).join('\n');
       planForm.value = { ...emptyPlanForm(), date: evDate, city: planCity.value, title: ev.title, category: 'other', location: ev.loc || ev.addr || '', notes };
       activityQuery.value = ev.title;
       addressQuery.value = ev.addr || ev.loc || '';
