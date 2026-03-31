@@ -31,7 +31,7 @@
           <div v-for="a in avatars" :key="a" class="avatar-opt" :class="{active: obAvatar===a}" @click="obAvatar=a">{{a}}</div>
         </div>
         <div class="onboard-btns">
-          <button class="btn btn-outline" @click="onboardBack">{{t('btn.back')}}
+          <button class="btn btn-outline" @click="onboardBack">{{t('btn.back')}}</button>
           <button class="btn btn-primary" @click="onboardNext">{{t('btn.next')}}</button>
         </div>
       </template>

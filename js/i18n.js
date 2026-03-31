@@ -48,3 +48,6 @@ const I18N = (() => {
 
   return { t, addLang, setLang, getLang, getLangs, detectLang };
 })();
+
+// Global shorthand so app.js can call t() directly
+const t = I18N.t;
