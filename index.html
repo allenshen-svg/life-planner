@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>时光记 · 生活规划与记录</title>
+<title>{{t('app.title')}}</title>
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -13,53 +13,53 @@
     <div class="onboard-card">
       <!-- Step 1: Nickname -->
       <template v-if="onboardStep===1">
-        <div class="onboard-title">👋 你好呀</div>
-        <div class="onboard-sub">欢迎来到时光记，先给自己取个名字吧</div>
-        <div class="onboard-step">STEP 1 / 4</div>
-        <input class="onboard-input" v-model="obNickname" placeholder="输入你的昵称…" maxlength="12" @keyup.enter="onboardNext">
+        <div class="onboard-title">{{t('onboard.hello')}}</div>
+        <div class="onboard-sub">{{t('onboard.welcome')}}</div>
+        <div class="onboard-step">{{t('onboard.step1')}}</div>
+        <input class="onboard-input" v-model="obNickname" :placeholder="t('onboard.nickname_hint')" maxlength="12" @keyup.enter="onboardNext">
         <div class="onboard-btns">
-          <button class="btn btn-primary btn-block" @click="onboardNext" :disabled="!obNickname.trim()">下一步 →</button>
+          <button class="btn btn-primary btn-block" @click="onboardNext" :disabled="!obNickname.trim()">{{t('btn.next')}}</button>
         </div>
       </template>
       <!-- Step 2: Avatar -->
       <template v-if="onboardStep===2">
         <div class="onboard-avatar-preview">{{obAvatar}}</div>
-        <div class="onboard-title">选个头像</div>
-        <div class="onboard-sub">挑一个你喜欢的可爱图标</div>
-        <div class="onboard-step">STEP 2 / 4</div>
+        <div class="onboard-title">{{t('onboard.avatar')}}</div>
+        <div class="onboard-sub">{{t('onboard.avatar_sub')}}</div>
+        <div class="onboard-step">{{t('onboard.step2')}}</div>
         <div class="avatar-grid">
           <div v-for="a in avatars" :key="a" class="avatar-opt" :class="{active: obAvatar===a}" @click="obAvatar=a">{{a}}</div>
         </div>
         <div class="onboard-btns">
-          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
-          <button class="btn btn-primary" @click="onboardNext">下一步 →</button>
+          <button class="btn btn-outline" @click="onboardBack">{{t('btn.back')}}
+          <button class="btn btn-primary" @click="onboardNext">{{t('btn.next')}}</button>
         </div>
       </template>
       <!-- Step 3: City -->
       <template v-if="onboardStep===3">
         <div class="onboard-avatar-preview">{{obAvatar}}</div>
-        <div class="onboard-title">你在哪座城市？</div>
-        <div class="onboard-sub">选择城市后，会为你推荐当地热门活动</div>
-        <div class="onboard-step">STEP 3 / 4</div>
+        <div class="onboard-title">{{t('onboard.city')}}</div>
+        <div class="onboard-sub">{{t('onboard.city_sub')}}</div>
+        <div class="onboard-step">{{t('onboard.step3')}}</div>
         <div class="city-grid">
           <div v-for="c in CITIES.slice(0,20)" :key="c" class="city-opt" :class="{active: obCity===c}" @click="obCity=c">{{c}}</div>
         </div>
-        <input class="onboard-input" v-model="obCity" placeholder="或输入你的城市…" maxlength="10" style="margin-top:10px">
+        <input class="onboard-input" v-model="obCity" :placeholder="t('onboard.city_hint')" maxlength="10" style="margin-top:10px">
         <div class="onboard-btns">
-          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
-          <button class="btn btn-primary" @click="onboardNext">下一步 →</button>
+          <button class="btn btn-outline" @click="onboardBack">{{t('btn.back')}}</button>
+          <button class="btn btn-primary" @click="onboardNext">{{t('btn.next')}}</button>
         </div>
       </template>
       <!-- Step 4: Age (optional) -->
       <template v-if="onboardStep===4">
         <div class="onboard-avatar-preview">{{obAvatar}}</div>
-        <div class="onboard-title">{{obNickname}}，最后一步</div>
-        <div class="onboard-sub">你的年龄是？（可以跳过）</div>
-        <div class="onboard-step">STEP 4 / 4</div>
-        <input class="onboard-input" v-model="obAge" type="number" placeholder="年龄（选填）" min="1" max="120" @keyup.enter="onboardNext">
+        <div class="onboard-title">{{obNickname}}{{t('onboard.last_step')}}</div>
+        <div class="onboard-sub">{{t('onboard.age')}}</div>
+        <div class="onboard-step">{{t('onboard.step4')}}</div>
+        <input class="onboard-input" v-model="obAge" type="number" :placeholder="t('onboard.age_hint')" min="1" max="120" @keyup.enter="onboardNext">
         <div class="onboard-btns">
-          <button class="btn btn-outline" @click="onboardBack">← 上一步</button>
-          <button class="btn btn-primary" @click="onboardNext">开始使用 🎉</button>
+          <button class="btn btn-outline" @click="onboardBack">{{t('btn.back')}}</button>
+          <button class="btn btn-primary" @click="onboardNext">{{t('btn.start')}}</button>
         </div>
       </template>
     </div>
@@ -68,8 +68,8 @@
   <!-- Header -->
   <header class="app-header">
     <div>
-      <h1>时光记</h1>
-      <div class="subtitle">LIFE PLANNER</div>
+      <h1>{{t('app.title')}}</h1>
+      <div class="subtitle">{{t('app.subtitle')}}</div>
     </div>
     <div class="header-right">
       <div class="profile-chip" v-if="profile" @click="onProfileClick">
@@ -78,16 +78,16 @@
         <span class="sync-dot" :class="syncStatus" v-if="authToken" :title="syncTitle"></span>
       </div>
       <div class="theme-picker-wrap">
-        <button class="theme-btn" @click.stop="showThemePicker=!showThemePicker" :style="{background: themeColor}" title="切换主题"></button>
+        <button class="theme-btn" @click.stop="showThemePicker=!showThemePicker" :style="{background: themeColor}" :title="t('btn.theme')"></button>
         <div class="theme-dropdown" v-if="showThemePicker" @click.stop>
-          <div class="theme-section-label">背景氛围</div>
+          <div class="theme-section-label">{{t('theme.bg')}}</div>
           <div class="theme-bg-grid">
             <div v-for="b in bgThemes" :key="b.value"
                  class="theme-bg-opt" :class="{active: bgTheme===b.value}"
                  :data-v="b.value" @click="setBgTheme(b.value)"
                  :title="b.label"><span style="position:relative;z-index:1">{{b.emoji}}</span></div>
           </div>
-          <div class="theme-section-label">强调色</div>
+          <div class="theme-section-label">{{t('theme.accent')}}</div>
           <div class="theme-color-grid">
             <div v-for="t in themeColors" :key="t.value"
                  class="theme-opt" :class="{active: themeColor===t.value}"
@@ -104,7 +104,7 @@
     <div class="quote-banner">
       <!-- User motto (pinned, editable) -->
       <div class="quote-motto" v-if="userMotto && !editingMotto">
-        <div class="quote-motto-pin">📌 我的座右铭</div>
+        <div class="quote-motto-pin">{{t('motto.title')}}</div>
         <div class="quote-motto-text">{{userMotto}}</div>
         <div class="quote-motto-actions">
           <span @click="startEditMotto">✏️</span>
@@ -113,20 +113,20 @@
       </div>
       <!-- Edit motto -->
       <div class="quote-motto-edit" v-if="editingMotto">
-        <input class="quote-motto-input" v-model="mottoInput" placeholder="写下你的座右铭…" maxlength="50" @keyup.enter="saveMotto">
+        <input class="quote-motto-input" v-model="mottoInput" :placeholder="t('motto.hint')" maxlength="50" @keyup.enter="saveMotto">
         <div class="quote-motto-edit-btns">
-          <button class="btn btn-sm btn-primary" @click="saveMotto">保存</button>
-          <button class="btn btn-sm btn-outline" @click="editingMotto=false">取消</button>
+          <button class="btn btn-sm btn-primary" @click="saveMotto">{{t('btn.save')}}</button>
+          <button class="btn btn-sm btn-outline" @click="editingMotto=false">{{t('btn.cancel')}}</button>
         </div>
       </div>
       <!-- Daily famous quote -->
       <div class="quote-daily">
         <div class="quote-text">「{{dailyQuote.text}}」</div>
-        <span class="quote-refresh" @click="refreshQuote" title="换一句">🔄</span>
+        <span class="quote-refresh" @click="refreshQuote" :title="t('btn.refresh_quote')">🔄</span>
       </div>
       <!-- Add motto button if none -->
       <div class="quote-add" v-if="!userMotto && !editingMotto" @click="startEditMotto">
-        + 添加我的座右铭
+        {{t('btn.add_motto')}}
       </div>
     </div>
 
@@ -134,16 +134,16 @@
     <div class="tab-bar" ref="tabBar">
       <div class="tab-indicator" :style="tabIndicatorStyle"></div>
       <div class="tab-item" :class="{active: tab==='plan'}" @click="tab='plan'">
-        <span class="tab-icon">◎</span>规划
+        <span class="tab-icon">◎</span>{{t('tab.plan')}}
       </div>
       <div class="tab-item" :class="{active: tab==='diary'}" @click="tab='diary'">
-        <span class="tab-icon">✎</span>日记
+        <span class="tab-icon">✎</span>{{t('tab.diary')}}
       </div>
       <div class="tab-item" :class="{active: tab==='review'}" @click="tab='review'">
-        <span class="tab-icon">▦</span>回顾
+        <span class="tab-icon">▦</span>{{t('tab.review')}}
       </div>
       <div class="tab-item" :class="{active: tab==='insights'}" @click="tab='insights'">
-        <span class="tab-icon">◈</span>洞察
+        <span class="tab-icon">◈</span>{{t('tab.insights')}}
       </div>
     </div>
 
@@ -162,7 +162,7 @@
       <!-- Floating Weekly Tasks -->
       <div class="float-section" v-if="activeFloats.length">
         <div class="float-header">
-          <span class="float-label">💫 本周浮动任务</span>
+          <span class="float-label">{{t('float.title')}}</span>
         </div>
         <div class="float-balls">
           <div class="float-ball" v-for="f in activeFloats" :key="f.id" :class="{completed: f.done >= f.target}" @click="bumpFloat(f.id)" @contextmenu.prevent="deleteFloat(f.id)">
@@ -177,7 +177,7 @@
         </div>
       </div>
       <div v-else style="margin-bottom:10px">
-        <button class="btn btn-outline btn-sm" @click="showFloatModal=true" style="font-size:12px">💫 + 浮动任务（本周内完成即可）</button>
+        <button class="btn btn-outline btn-sm" @click="showFloatModal=true" style="font-size:12px">{{t('btn.add_float')}}</button>
       </div>
 
       <!-- Quick Actions -->
@@ -191,10 +191,10 @@
       <!-- Add Plan Button -->
       <div style="margin-bottom:14px;display:flex;gap:10px">
         <button class="btn btn-primary" style="flex:1" @click="showPlanModal=true">
-          + 自定义计划
+          {{t('btn.add_plan')}}
         </button>
         <button class="btn btn-outline" style="flex:0 0 auto;padding:0 16px" @click="showTemplates=!showTemplates">
-          📋 模板
+          {{t('btn.templates')}}
         </button>
       </div>
 
@@ -205,7 +205,7 @@
           <div class="tpl-info">
             <div class="tpl-title">{{tpl.title}}</div>
             <div class="tpl-desc">{{tpl.desc}}</div>
-            <div class="tpl-meta">{{tpl.days}}天 · 每天{{tpl.tasks.length}}项</div>
+            <div class="tpl-meta">{{t('tpl.meta', tpl.days, tpl.tasks.length)}}</div>
           </div>
           <div class="tpl-glow"></div>
         </div>
@@ -219,7 +219,7 @@
         </div>
         <div class="reward-info">
           <div class="reward-title">{{dayReward.title}}</div>
-          <div class="reward-progress">{{dayReward.done}} / {{dayReward.total}} 已完成</div>
+          <div class="reward-progress">{{t('reward.progress', dayReward.done, dayReward.total)}}</div>
         </div>
         <div class="reward-bar-track">
           <div class="reward-bar-fill" :style="{width: (dayReward.total?dayReward.done/dayReward.total*100:0)+'%'}"></div>
@@ -237,36 +237,36 @@
           <div class="plan-location" v-if="p.location">{{p.location}}</div>
           <!-- Attached widgets -->
           <div class="plan-widgets" v-if="p.widgets && p.widgets.length && !p.skipped">
-            <div v-if="p.widgets.includes('pomodoro')" class="pw pw-pomo" @click.stop="startPlanPomodoro(p)">🍅 开始专注</div>
-            <div v-if="p.widgets.includes('counter')" class="pw pw-counter" @click.stop="bumpCounter(p.id)">📊 {{p.counterVal||0}} 次 <span class="pw-plus">+1</span></div>
+            <div v-if="p.widgets.includes('pomodoro')" class="pw pw-pomo" @click.stop="startPlanPomodoro(p)">{{t('widget.pomo_start')}}</div>
+            <div v-if="p.widgets.includes('counter')" class="pw pw-counter" @click.stop="bumpCounter(p.id)">📊 {{p.counterVal||0}} {{t('unit.times')}} <span class="pw-plus">+1</span></div>
             <div v-if="p.widgets.includes('micronote')" class="pw pw-note">
-              <input type="text" class="pw-note-input" :value="p.micronote||''" @change="saveMicronote(p.id, $event.target.value)" @click.stop placeholder="记一笔..." />
+              <input type="text" class="pw-note-input" :value="p.micronote||''" @change="saveMicronote(p.id, $event.target.value)" @click.stop :placeholder="t('widget.note_hint')" />
             </div>
           </div>
           <div class="plan-actions">
-            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id, $event)" title="完成" v-if="!p.skipped">{{p.done ? '✅' : '⬜'}}</button>
-            <button @click="skipPlan(p.id)" :title="p.skipped ? '恢复' : '请假'">{{p.skipped ? '🔄' : '😴'}}</button>
-            <button @click="sharePlan(p)" title="分享">↗</button>
-            <button @click="editPlan(p)" title="编辑">✎</button>
-            <button @click="deletePlan(p.id)" title="删除">×</button>
+            <button class="done-btn" :class="{checked: p.done}" @click="toggleDone(p.id, $event)" :title="t('btn.done')" v-if="!p.skipped">{{p.done ? '✅' : '⬜'}}</button>
+            <button @click="skipPlan(p.id)" :title="p.skipped ? t('btn.resume') : t('btn.skip')">{{p.skipped ? '🔄' : '😴'}}</button>
+            <button @click="sharePlan(p)" :title="t('btn.share')">↗</button>
+            <button @click="editPlan(p)" :title="t('btn.edit')">✎</button>
+            <button @click="deletePlan(p.id)" :title="t('btn.delete')">×</button>
           </div>
           <!-- Transport between plans -->
           <div v-if="p._nextLocation" style="margin-top:8px">
             <button class="btn btn-outline btn-sm"
                     @click="getTransport(p.location, p._nextLocation)">
-              到下一站交通 →
+              {{t('btn.transport')}}
             </button>
           </div>
         </div>
       </div>
       <div v-else class="empty-state">
         <div class="empty-icon">○</div>
-        <p>这一天还没有计划<br>点击上方按钮添加吧</p>
+        <p>{{t('empty.plan')}}</p>
       </div>
 
       <!-- Hot Events -->
       <div class="card" v-if="hotEvents.length || hotCategories.length > 1">
-        <div class="card-title">🔥 {{planCity}} 热门活动</div>
+        <div class="card-title">{{t('hot.city_title', planCity)}}</div>
         <div class="hot-cat-tabs">
           <span v-for="c in hotCategories" :key="c" class="hot-cat-tab" :class="{active: hotCategory===c}" @click="hotCategory=c">{{c}}</span>
         </div>
@@ -286,13 +286,13 @@
           </div>
         </div>
         <div class="hot-expand" v-if="hotHasMore" @click="toggleHotExpand">
-          {{hotExpanded ? '收起 ▲' : '查看更多 ▼'}}
+          {{hotExpanded ? t('btn.collapse') : t('btn.more')}}
         </div>
       </div>
 
       <!-- Transport Result -->
       <div class="ai-panel" v-if="aiTransportResult">
-        <div class="ai-title">交通建议</div>
+        <div class="ai-title">{{t('hot.route')}}</div>
         <div class="ai-result" v-if="!aiTransportLoading">{{aiTransportResult}}</div>
         <div class="ai-loading" v-else><div class="spinner"></div></div>
       </div>
@@ -302,7 +302,7 @@
     <div v-if="tab==='diary'">
       <div style="margin-bottom:14px">
         <button class="btn btn-primary btn-block" @click="showDiaryModal=true">
-          + 写日记
+          {{t('btn.add_diary')}}
         </button>
       </div>
 
@@ -318,14 +318,14 @@
           </div>
           <div class="diary-content">{{e.content}}</div>
           <div class="diary-actions">
-            <button class="btn btn-outline btn-sm" @click="editDiary(e)">编辑</button>
-            <button class="btn btn-sm" style="color:var(--rose)" @click="deleteDiary(e.id)">删除</button>
+            <button class="btn btn-outline btn-sm" @click="editDiary(e)">{{t('btn.edit')}}</button>
+            <button class="btn btn-sm" style="color:var(--rose)" @click="deleteDiary(e.id)">{{t('btn.delete')}}</button>
           </div>
         </div>
       </div>
       <div v-else class="empty-state">
         <div class="empty-icon">○</div>
-        <p>今天还没有写日记<br>记录下你的生活吧</p>
+        <p>{{t('empty.diary')}}</p>
       </div>
     </div>
 
@@ -335,11 +335,11 @@
       <div class="card">
         <div class="calendar-nav">
           <button @click="calPrev">‹</button>
-          <span class="calendar-month">{{calYear}}年{{calMonth+1}}月</span>
+          <span class="calendar-month">{{t('cal.month', calYear, calMonth+1)}}</span>
           <button @click="calNext">›</button>
         </div>
         <div class="calendar-grid">
-          <div class="cal-header" v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{d}}</div>
+          <div class="cal-header" v-for="d in t('cal.days').split(',')" :key="d">{{d}}</div>
           <div v-for="(d,i) in calDays" :key="i"
                class="cal-day"
                :class="{today: d.isToday, selected: d.date===reviewDate, 'other-month': d.otherMonth}"
@@ -353,32 +353,32 @@
 
       <!-- Selected Day Summary -->
       <div class="card" v-if="reviewDate">
-        <div class="card-title">{{reviewDate}} 的记录</div>
+        <div class="card-title">{{t('review.day_title', reviewDate)}}</div>
         <div v-if="reviewDayPlans.length" style="margin-bottom:10px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px">计划：</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">{{t('review.plans')}}:</div>
           <div v-for="p in reviewDayPlans" :key="p.id" style="font-size:13px;margin-bottom:4px">
             {{p.time_start}}-{{p.time_end}} {{p.title}} <span v-if="p.location" style="color:var(--text2)">{{p.location}}</span>
           </div>
         </div>
         <div v-if="reviewDayDiary.length">
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px">日记：</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">{{t('review.diaries')}}:</div>
           <div v-for="e in reviewDayDiary" :key="e.id" style="font-size:13px;margin-bottom:4px">
             {{moodEmoji(e.mood)}} {{e.content && e.content.substring(0,80)}}...
           </div>
         </div>
         <div v-if="!reviewDayPlans.length && !reviewDayDiary.length">
-          <div class="empty-state" style="padding:16px"><p>这一天没有记录</p></div>
+          <div class="empty-state" style="padding:16px"><p>{{t('review.no_record')}}</p></div>
         </div>
       </div>
 
       <!-- AI Life Review -->
       <div class="card">
-        <div class="card-title">AI 生活点评</div>
+        <div class="card-title">{{t('review.ai_title')}}</div>
         <div class="btn-group" style="margin-bottom:12px">
-          <button class="btn btn-primary btn-sm" @click="getLifeReview('week')">本周回顾</button>
-          <button class="btn btn-outline btn-sm" @click="getLifeReview('month')">本月回顾</button>
+          <button class="btn btn-primary btn-sm" @click="getLifeReview('week')">{{t('btn.week_review')}}</button>
+          <button class="btn btn-outline btn-sm" @click="getLifeReview('month')">{{t('btn.month_review')}}</button>
         </div>
-        <div class="ai-loading" v-if="aiReviewLoading"><div class="spinner"></div><p>AI正在分析你的生活...</p></div>
+        <div class="ai-loading" v-if="aiReviewLoading"><div class="spinner"></div><p>{{t('review.ai_loading')}}</p></div>
         <div class="ai-result" v-if="aiReviewResult && !aiReviewLoading">{{aiReviewResult}}</div>
       </div>
     </div>
@@ -398,15 +398,15 @@
 
       <!-- Quick Stats -->
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-num">{{statsOverview.totalPlans}}</div><div class="stat-label">计划总数</div></div>
-        <div class="stat-card"><div class="stat-num">{{statsOverview.completedPlans}}</div><div class="stat-label">已完成</div></div>
-        <div class="stat-card"><div class="stat-num">{{statsOverview.diaryCount}}</div><div class="stat-label">日记篇数</div></div>
-        <div class="stat-card"><div class="stat-num">{{statsOverview.streak}}</div><div class="stat-label">连续天数</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.totalPlans}}</div><div class="stat-label">{{t('stats.total')}}</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.completedPlans}}</div><div class="stat-label">{{t('stats.completed')}}</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.diaryCount}}</div><div class="stat-label">{{t('stats.diary')}}</div></div>
+        <div class="stat-card"><div class="stat-num">{{statsOverview.streak}}</div><div class="stat-label">{{t('stats.streak')}}</div></div>
       </div>
 
       <!-- Mood Trend -->
       <div class="card">
-        <div class="card-title">📈 心情趋势（近30天）</div>
+        <div class="card-title">{{t('insights.mood_title')}}</div>
         <canvas ref="moodCanvas" width="600" height="200" style="width:100%;height:160px"></canvas>
         <div class="mood-legend">
           <span v-for="m in moods" :key="m.key" class="mood-legend-item">{{m.emoji}} {{m.label}}</span>
@@ -415,32 +415,32 @@
 
       <!-- Habit Heatmap -->
       <div class="card">
-        <div class="card-title">🟩 习惯热力图（近90天）</div>
+        <div class="card-title">{{t('insights.heat_title')}}</div>
         <div class="heatmap-months">
           <span v-for="m in heatmapMonths" :key="m.label" class="heatmap-month-label" :style="{left: m.offset+'%'}">{{m.label}}</span>
         </div>
         <div class="heatmap-grid">
           <div v-for="(d,i) in heatmapDays" :key="i" class="heatmap-cell"
-               :class="'heat-'+d.level" :title="d.date+': '+d.count+'个计划完成'"></div>
+               :class="'heat-'+d.level" :title="d.date+': '+d.count+' '+t('stats.plans_done')"></div>
         </div>
         <div class="heatmap-legend">
-          <span class="heatmap-legend-label">少</span>
+          <span class="heatmap-legend-label">{{t('insights.heat_less')}}</span>
           <span class="heatmap-cell heat-0"></span>
           <span class="heatmap-cell heat-1"></span>
           <span class="heatmap-cell heat-2"></span>
           <span class="heatmap-cell heat-3"></span>
           <span class="heatmap-cell heat-4"></span>
-          <span class="heatmap-legend-label">多</span>
+          <span class="heatmap-legend-label">{{t('insights.heat_more')}}</span>
         </div>
       </div>
 
       <!-- 24h Time Pie -->
       <div class="card">
-        <div class="card-title">🕐 时间分配（{{pieDateLabel}}）</div>
+        <div class="card-title">{{t('insights.time_title', pieDateLabel)}}</div>
         <div class="pie-date-pick">
-          <button class="btn btn-sm btn-outline" @click="pieDateOffset--">‹ 前一天</button>
+          <button class="btn btn-sm btn-outline" @click="pieDateOffset--">{{t('insights.pie_prev')}}</button>
           <span>{{pieDate}}</span>
-          <button class="btn btn-sm btn-outline" @click="pieDateOffset < 0 && pieDateOffset++">后一天 ›</button>
+          <button class="btn btn-sm btn-outline" @click="pieDateOffset < 0 && pieDateOffset++">{{t('insights.pie_next')}}</button>
         </div>
         <div class="pie-wrap">
           <canvas ref="pieCanvas" width="300" height="300" style="width:200px;height:200px"></canvas>
@@ -449,26 +449,26 @@
               <span class="pie-dot" :style="{background: s.color}"></span>
               {{s.label}} {{s.hours}}h
             </div>
-            <div v-if="!pieSlices.length" class="empty-state" style="padding:8px"><p>当天无计划数据</p></div>
+            <div v-if="!pieSlices.length" class="empty-state" style="padding:8px"><p>{{t('insights.pie_empty')}}</p></div>
           </div>
         </div>
       </div>
 
       <!-- Monthly Report -->
       <div class="card monthly-report">
-        <div class="card-title">📋 {{reportMonth}}月时光报告</div>
+        <div class="card-title">{{t('insights.report_title', reportMonth)}}</div>
         <div class="report-grid">
-          <div class="report-item"><div class="report-num">{{monthReport.completed}}/{{monthReport.total}}</div><div class="report-label">计划完成率</div></div>
-          <div class="report-item"><div class="report-num">{{monthReport.diaryCount}}</div><div class="report-label">日记篇数</div></div>
-          <div class="report-item"><div class="report-num">{{monthReport.topCategory || '—'}}</div><div class="report-label">最常计划</div></div>
-          <div class="report-item"><div class="report-num">{{monthReport.topMood || '—'}}</div><div class="report-label">主要心情</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.completed}}/{{monthReport.total}}</div><div class="report-label">{{t('insights.completion')}}</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.diaryCount}}</div><div class="report-label">{{t('stats.diary')}}</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.topCategory || '—'}}</div><div class="report-label">{{t('insights.top_cat')}}</div></div>
+          <div class="report-item"><div class="report-num">{{monthReport.topMood || '—'}}</div><div class="report-label">{{t('insights.top_mood')}}</div></div>
         </div>
         <div class="report-insight" v-if="monthReport.insight">💡 {{monthReport.insight}}</div>
       </div>
 
       <!-- Achievement Badges -->
       <div class="card">
-        <div class="card-title">🏆 成就徽章（{{unlockedBadgeCount}}/{{allBadges.length}}）</div>
+        <div class="card-title">{{t('insights.badge_title', unlockedBadgeCount, allBadges.length)}}</div>
         <div class="badge-grid">
           <div v-for="b in allBadges" :key="b.id" class="badge-item" :class="{locked: !b.unlocked}" :title="b.desc">
             <div class="badge-icon">{{b.unlocked ? b.icon : '🔒'}}</div>
@@ -480,26 +480,26 @@
 
       <!-- Pomodoro Entry -->
       <div class="card" style="text-align:center">
-        <div class="card-title">🍅 专注计时器</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">开始专注，种下一棵小树</p>
-        <button class="btn btn-primary" @click="showPomodoro=true">开始专注</button>
+        <div class="card-title">{{t('insights.focus_title')}}</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">{{t('focus.idle_msg')}}</p>
+        <button class="btn btn-primary" @click="showPomodoro=true">{{t('btn.start_focus')}}</button>
         <div class="focus-history" v-if="focusHistory.length">
-          <div class="focus-stat">累计专注 {{totalFocusMin}} 分钟 · {{focusHistory.length}} 次</div>
+          <div class="focus-stat">{{t('focus.total', totalFocusMin, focusHistory.length)}}</div>
         </div>
       </div>
 
       <!-- Time Capsule Entry -->
       <div class="card" style="text-align:center">
-        <div class="card-title">💌 时光胶囊</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">给未来的自己写一封信</p>
-        <button class="btn btn-primary" @click="showCapsuleModal=true">写一封信</button>
+        <div class="card-title">{{t('insights.capsule_title')}}</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px">{{t('insights.capsule_desc')}}</p>
+        <button class="btn btn-primary" @click="showCapsuleModal=true">{{t('btn.write_letter')}}</button>
         <div v-if="capsules.length" style="margin-top:12px">
           <div v-for="c in capsules" :key="c.id" class="capsule-item">
             <span class="capsule-icon">{{c.opened ? '📨' : '✉️'}}</span>
-            <span class="capsule-date">{{c.opened ? '已开启' : c.deliverDate+' 开启'}}</span>
+            <span class="capsule-date">{{c.opened ? t('capsule.opened') : c.deliverDate+' '+t('capsule.open_on')}}</span>
             <span class="capsule-preview" v-if="c.opened">{{c.content.substring(0,30)}}…</span>
-            <button v-if="!c.opened" class="btn btn-sm btn-outline" disabled>未到时间</button>
-            <button v-if="c.opened" class="btn btn-sm btn-outline" @click="viewCapsule(c)">查看</button>
+            <button v-if="!c.opened" class="btn btn-sm btn-outline" disabled>{{t('capsule.not_yet')}}</button>
+            <button v-if="c.opened" class="btn btn-sm btn-outline" @click="viewCapsule(c)">{{t('btn.view')}}</button>
           </div>
         </div>
       </div>
@@ -510,19 +510,19 @@
   <div class="modal-overlay" :class="{'immersive-overlay': immersive}" v-if="showPomodoro" @click.self="cancelFocus">
     <div class="modal-content pomodoro-modal" :class="{'immersive-modal': immersive}">
       <div class="modal-header">
-        <h3>{{focusState==='idle'?'🍅 专注计时器':(focusState==='break'?'☕ 休息时间':'🌱 心流模式')}}</h3>
+        <h3>{{focusState==='idle'? t('insights.focus_title') :(focusState==='break'? t('focus.break') : t('focus.flow'))}}</h3>
         <button class="modal-close" @click="cancelFocus">×</button>
       </div>
       <div class="pomo-plant">{{focusPlantEmoji}}</div>
       <div class="pomo-timer">{{focusTimeDisplay}}</div>
       <div class="pomo-controls" v-if="focusState==='idle'">
         <div class="pomo-presets">
-          <button v-for="m in [15,25,45]" :key="m" class="btn btn-sm" :class="focusDuration===m?'btn-primary':'btn-outline'" @click="focusDuration=m">{{m}}分钟</button>
+          <button v-for="m in [15,25,45]" :key="m" class="btn btn-sm" :class="focusDuration===m?'btn-primary':'btn-outline'" @click="focusDuration=m">{{m}} {{t('unit.min')}}</button>
         </div>
-        <button class="btn btn-primary btn-block" style="margin-top:14px" @click="startFocus">进入心流 🌱</button>
+        <button class="btn btn-primary btn-block" style="margin-top:14px" @click="startFocus">{{t('btn.enter_flow')}}</button>
       </div>
       <div class="pomo-controls" v-else-if="focusState==='running'">
-        <p style="color:var(--text2);font-size:13px;text-align:center">专注中…沉浸在当下</p>
+        <p style="color:var(--text2);font-size:13px;text-align:center">{{t('focus.running')}}</p>
         <!-- White Noise -->
         <div class="ambient-bar">
           <span v-for="s in AMBIENT_SOUNDS" :key="s.key" class="ambient-btn" :class="{active: ambientSound===s.key}" @click="playAmbient(s.key)">
@@ -530,16 +530,16 @@
             <span class="ambient-label">{{s.label}}</span>
           </span>
         </div>
-        <button class="btn btn-outline btn-block" style="margin-top:14px;color:var(--rose)" @click="abandonFocus">放弃专注 🥀</button>
+        <button class="btn btn-outline btn-block" style="margin-top:14px;color:var(--rose)" @click="abandonFocus">{{t('btn.abandon')}}</button>
       </div>
       <div class="pomo-controls" v-else-if="focusState==='done'">
-        <p style="text-align:center;font-size:15px">🎉 太棒了！专注完成！</p>
+        <p style="text-align:center;font-size:15px">🎉 {{t('focus.done_msg')}}</p>
         <p style="text-align:center;color:var(--text2);font-size:13px">+{{focusDuration >= 25 ? 15 : 8}} EXP</p>
-        <button class="btn btn-primary btn-block" style="margin-top:10px" @click="finishFocus">收下奖励 🌳</button>
+        <button class="btn btn-primary btn-block" style="margin-top:10px" @click="finishFocus">{{t('btn.collect')}}</button>
       </div>
       <div class="pomo-controls" v-else-if="focusState==='break'">
-        <p style="text-align:center;color:var(--text2);font-size:13px">休息一下，活动活动身体</p>
-        <button class="btn btn-outline btn-block" style="margin-top:10px" @click="endBreak">结束休息</button>
+        <p style="text-align:center;color:var(--text2);font-size:13px">{{t('focus.break_msg')}}</p>
+        <button class="btn btn-outline btn-block" style="margin-top:10px" @click="endBreak">{{t('btn.end_break')}}</button>
       </div>
     </div>
   </div>
@@ -548,20 +548,20 @@
   <div class="modal-overlay" v-if="showCapsuleModal" @click.self="showCapsuleModal=false">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>💌 给未来的自己</h3>
+        <h3>{{t('capsule.write_title')}}</h3>
         <button class="modal-close" @click="showCapsuleModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">开启日期</label>
+        <label class="form-label">{{t('capsule.date_label')}}</label>
         <input type="date" class="form-input" v-model="capsuleForm.deliverDate" :min="capsuleMinDate">
       </div>
       <div class="form-group">
-        <label class="form-label">写给未来的话</label>
+        <label class="form-label">{{t('capsule.content_label')}}</label>
         <textarea class="form-textarea" v-model="capsuleForm.content" rows="6"
-                  placeholder="亲爱的未来的我，当你看到这封信的时候…"></textarea>
+                  :placeholder="t('capsule.hint')"></textarea>
       </div>
       <button class="btn btn-primary btn-block" @click="saveCapsule" :disabled="!capsuleForm.content.trim()">
-        封存时光胶囊 ✉️
+        {{t('btn.seal')}}
       </button>
     </div>
   </div>
@@ -571,25 +571,25 @@
   <div class="modal-overlay" v-if="showFloatModal" @click.self="showFloatModal=false">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>💫 新建浮动任务</h3>
+        <h3>{{t('float.modal_title')}}</h3>
         <button class="modal-close" @click="showFloatModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">图标</label>
+        <label class="form-label">{{t('float.icon')}}</label>
         <div class="emoji-picker-inline">
           <span v-for="e in FLOAT_EMOJIS" :key="e" class="emoji-opt" :class="{active: floatForm.emoji===e}" @click="floatForm.emoji=e">{{e}}</span>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">任务名称</label>
-        <input type="text" class="form-input" v-model="floatForm.title" placeholder="例：本周跑步3次">
+        <label class="form-label">{{t('float.name')}}</label>
+        <input type="text" class="form-input" v-model="floatForm.title" :placeholder="t('float.name_hint')">
       </div>
       <div class="form-group">
-        <label class="form-label">本周目标次数</label>
+        <label class="form-label">{{t('float.target')}}</label>
         <input type="number" class="form-input" v-model.number="floatForm.target" min="1" max="20">
       </div>
       <button class="btn btn-primary btn-block" @click="saveFloat">
-        添加浮动任务
+        {{t('float.save')}}
       </button>
     </div>
   </div>
@@ -597,11 +597,11 @@
   <div class="modal-overlay" v-if="viewingCapsule" @click.self="viewingCapsule=null">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>📨 来自过去的信</h3>
+        <h3>{{t('capsule.view_title')}}</h3>
         <button class="modal-close" @click="viewingCapsule=null">×</button>
       </div>
       <div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:12px">
-        写于 {{viewingCapsule.createdDate}}
+        {{t('capsule.written_on', viewingCapsule.createdDate)}}
       </div>
       <div style="white-space:pre-wrap;line-height:1.8;font-size:14px">{{viewingCapsule.content}}</div>
     </div>
@@ -611,39 +611,39 @@
   <div class="modal-overlay" v-if="showPlanModal" @click.self="showPlanModal=false">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{{editingPlan ? '编辑计划' : '添加计划'}}</h3>
+        <h3>{{editingPlan ? t('plan.edit_title') : t('plan.add_title')}}</h3>
         <button class="modal-close" @click="showPlanModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">日期</label>
+        <label class="form-label">{{t('plan.date')}}</label>
         <input type="date" class="form-input" v-model="planForm.date">
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">开始时间</label>
+          <label class="form-label">{{t('plan.start')}}</label>
           <input type="time" class="form-input" v-model="planForm.time_start">
         </div>
         <div class="form-group">
-          <label class="form-label">结束时间</label>
+          <label class="form-label">{{t('plan.end')}}</label>
           <input type="time" class="form-input" v-model="planForm.time_end">
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">做什么</label>
+        <label class="form-label">{{t('plan.what')}}</label>
         <!-- Quick action sub-activities -->
         <div v-if="quickActionSubs" style="margin-bottom:12px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{quickActionSubs.emoji}} {{quickActionSubs.title}} · 选择具体活动</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">{{quickActionSubs.emoji}} {{quickActionSubs.title}} {{t('plan.pick_activity')}}</div>
           <div class="act-chips">
             <span v-for="s in quickActionSubs.items" :key="s"
                   class="act-chip" :class="{active: planForm.title===s}"
                   @click="selectActivity(s)">{{s}}</span>
           </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--text3);cursor:pointer" @click="quickActionSubs=null">或 浏览全部活动 ↓</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text3);cursor:pointer" @click="quickActionSubs=null">{{t('plan.browse_all')}}</div>
         </div>
         <!-- Search input -->
         <div class="dropdown-wrap" style="margin-bottom:10px">
           <input type="text" class="form-input" v-model="activityQuery"
-                 placeholder="搜索活动 或 自定义输入…"
+                 :placeholder="t('plan.search')"
                  @focus="showActivityDropdown=true"
                  @input="showActivityDropdown=true"
                  @blur="showActivityDropdown=false">
@@ -670,29 +670,29 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">城市</label>
+          <label class="form-label">{{t('plan.city')}}</label>
           <select class="form-select" v-model="planForm.city">
             <option v-for="c in CITIES" :key="c" :value="c">{{c}}</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">类别</label>
+          <label class="form-label">{{t('plan.category')}}</label>
           <select class="form-select" v-model="planForm.category">
-            <option value="food">美食</option>
-            <option value="shopping">购物</option>
-            <option value="exercise">运动</option>
-            <option value="social">社交</option>
-            <option value="work">工作</option>
-            <option value="travel">旅行</option>
-            <option value="other">其他</option>
+            <option value="food">{{t('cat.food')}}</option>
+            <option value="shopping">{{t('cat.shopping')}}</option>
+            <option value="exercise">{{t('cat.exercise')}}</option>
+            <option value="social">{{t('cat.social')}}</option>
+            <option value="work">{{t('cat.work')}}</option>
+            <option value="travel">{{t('cat.travel')}}</option>
+            <option value="other">{{t('cat.other')}}</option>
           </select>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">地点</label>
+        <label class="form-label">{{t('plan.location')}}</label>
         <div class="dropdown-wrap">
           <input type="text" class="form-input" v-model="addressQuery"
-                 placeholder="输入地址关键字…"
+                 :placeholder="t('plan.addr_hint')"
                  @input="onAddressInput"
                  @focus="showAddressDropdown=addressSuggestions.length>0"
                  @blur="showAddressDropdown=false">
@@ -708,21 +708,21 @@
       </div>
       <!-- Emoji & Color Picker -->
       <div class="form-group">
-        <label class="form-label">图标 & 主题色</label>
+        <label class="form-label">{{t('plan.icon_color')}}</label>
         <div class="emoji-color-row">
           <div class="emoji-picker-inline">
             <span v-for="e in PLAN_EMOJIS" :key="e" class="emoji-opt" :class="{active: planForm.emoji===e}" @click="planForm.emoji = planForm.emoji===e ? '' : e">{{e}}</span>
           </div>
           <div class="color-picker-inline">
             <span v-for="c in PLAN_COLORS" :key="c.value" class="color-opt" :class="{active: planForm.color===c.value}" :style="c.value ? {background: c.value} : {}" @click="planForm.color = planForm.color===c.value ? '' : c.value" :title="c.name">
-              <span v-if="!c.value" style="font-size:10px">无</span>
+              <span v-if="!c.value" style="font-size:10px">{{t('plan.none')}}</span>
             </span>
           </div>
         </div>
       </div>
       <!-- Widget picker -->
       <div class="form-group">
-        <label class="form-label">挂载组件</label>
+        <label class="form-label">{{t('plan.widgets')}}</label>
         <div class="widget-picker">
           <div v-for="w in PLAN_WIDGETS" :key="w.key" class="widget-opt" :class="{active: (planForm.widgets||[]).includes(w.key)}" @click="toggleWidget(w.key)">
             <span class="widget-opt-icon">{{w.icon}}</span>
@@ -732,11 +732,11 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">备注</label>
-        <textarea class="form-textarea" v-model="planForm.notes" placeholder="其他备注..."></textarea>
+        <label class="form-label">{{t('plan.notes')}}</label>
+        <textarea class="form-textarea" v-model="planForm.notes" :placeholder="t('plan.notes_hint')"></textarea>
       </div>
       <button class="btn btn-primary btn-block" @click="savePlan">
-        {{editingPlan ? '保存修改' : '添加计划'}}
+        {{editingPlan ? t('btn.save_edit') : t('btn.add_plan_submit')}}
       </button>
     </div>
   </div>
@@ -751,31 +751,31 @@
       <div class="hot-detail-tag"><span class="hot-tag">{{hotDetail.tag}}</span><span class="hot-detail-heat">🔥 {{hotDetail.heat}}</span></div>
       <div class="hot-detail-items">
         <div class="hot-detail-item">
-          <span class="hot-detail-label">📅 时间</span>
+          <span class="hot-detail-label">{{t('hot.time')}}</span>
           <span class="hot-detail-val">{{hotDetail.date}}</span>
         </div>
         <div class="hot-detail-item">
-          <span class="hot-detail-label">📍 地点</span>
+          <span class="hot-detail-label">{{t('hot.place')}}</span>
           <span class="hot-detail-val">{{hotDetail.loc}}</span>
         </div>
         <div class="hot-detail-item">
-          <span class="hot-detail-label">🏠 详细地址</span>
+          <span class="hot-detail-label">{{t('hot.addr')}}</span>
           <span class="hot-detail-val">{{hotDetail.addr}}</span>
         </div>
         <div class="hot-detail-item">
-          <span class="hot-detail-label">📋 所需证件</span>
+          <span class="hot-detail-label">{{t('hot.docs')}}</span>
           <span class="hot-detail-val">{{hotDetail.docs}}</span>
         </div>
         <div class="hot-detail-item">
-          <span class="hot-detail-label">🚇 交通路线</span>
+          <span class="hot-detail-label">{{t('hot.transit')}}</span>
           <span class="hot-detail-val">{{hotDetail.route}}</span>
         </div>
         <div class="hot-detail-item">
-          <span class="hot-detail-label">💡 温馨提示</span>
+          <span class="hot-detail-label">{{t('hot.tips')}}</span>
           <span class="hot-detail-val">{{hotDetail.tips}}</span>
         </div>
       </div>
-      <button class="btn btn-primary btn-block" @click="addHotEvent(hotDetail); closeHotDetail()">加入我的计划</button>
+      <button class="btn btn-primary btn-block" @click="addHotEvent(hotDetail); closeHotDetail()">{{t('btn.join_plan')}}</button>
     </div>
   </div>
 
@@ -783,15 +783,15 @@
   <div class="modal-overlay" v-if="showDiaryModal" @click.self="showDiaryModal=false">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{{editingDiary ? '编辑日记' : '写日记'}}</h3>
+        <h3>{{editingDiary ? t('diary.edit_title') : t('diary.write_title')}}</h3>
         <button class="modal-close" @click="showDiaryModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">日期</label>
+        <label class="form-label">{{t('plan.date')}}</label>
         <input type="date" class="form-input" v-model="diaryForm.date">
       </div>
       <div class="form-group">
-        <label class="form-label">今天的心情</label>
+        <label class="form-label">{{t('diary.mood')}}</label>
         <div class="mood-selector">
           <div v-for="m in moods" :key="m.key"
                class="mood-btn" :class="{active: diaryForm.mood===m.key}"
@@ -801,7 +801,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">标签</label>
+        <label class="form-label">{{t('diary.tags')}}</label>
         <div class="tag-list">
           <span v-for="t in allTags" :key="t"
                 class="tag" :class="{active: diaryForm.tags.includes(t)}"
@@ -809,13 +809,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">记录你的一天</label>
+        <label class="form-label">{{t('diary.content')}}</label>
         <textarea class="form-textarea" v-model="diaryForm.content"
-                  placeholder="今天做了什么？有什么感想？遇到了什么开心/烦心的事？"
+                  :placeholder="t('diary.hint')"
                   rows="6"></textarea>
       </div>
       <button class="btn btn-primary btn-block" @click="saveDiary">
-        {{editingDiary ? '保存修改' : '保存日记'}}
+        {{editingDiary ? t('btn.save_edit') : t('btn.save_diary')}}
       </button>
     </div>
   </div>
@@ -824,15 +824,15 @@
   <div class="modal-overlay" v-if="showRegNudge" @click.self="dismissRegNudge" style="z-index:250">
     <div class="modal-content" style="max-width:380px;border-radius:24px;text-align:center;padding:32px 24px 28px">
       <div style="font-size:48px;margin-bottom:12px">🔒</div>
-      <div style="font-size:20px;font-weight:800;margin-bottom:8px">保护你的记录</div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:8px">{{t('nudge.title')}}</div>
       <div style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:6px">
-        你已经使用时光记一周了！<br>
-        注册账号可以将日记和计划同步到云端，<br>
-        换手机也不会丢失数据 ☁️
+        {{t('nudge.body1')}}<br>
+        {{t('nudge.body2')}}<br>
+        {{t('nudge.body3')}}
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:20px">仅需邮箱，10秒完成</div>
-      <button class="btn btn-primary btn-block" style="margin-bottom:10px" @click="acceptRegNudge">📧 注册保护数据</button>
-      <button class="btn btn-outline btn-block" @click="dismissRegNudge">以后再说</button>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:20px">{{t('nudge.sub')}}</div>
+      <button class="btn btn-primary btn-block" style="margin-bottom:10px" @click="acceptRegNudge">{{t('btn.register_data')}}</button>
+      <button class="btn btn-outline btn-block" @click="dismissRegNudge">{{t('btn.later')}}</button>
     </div>
   </div>
 
@@ -840,24 +840,24 @@
   <div class="modal-overlay" v-if="showAuthModal" @click.self="showAuthModal=false">
     <div class="modal-content auth-modal">
       <div class="modal-header">
-        <h3>{{authMode==='login' ? '登录' : '注册'}}</h3>
+        <h3>{{authMode==='login' ? t('btn.login') : t('btn.register')}}</h3>
         <button class="modal-close" @click="showAuthModal=false">×</button>
       </div>
       <div class="form-group">
-        <label class="form-label">邮箱</label>
-        <input type="email" class="form-input" v-model="authEmail" placeholder="输入邮箱地址" maxlength="120">
+        <label class="form-label">{{t('auth.email')}}</label>
+        <input type="email" class="form-input" v-model="authEmail" :placeholder="t('auth.email_hint')" maxlength="120">
       </div>
       <div class="form-group">
-        <label class="form-label">密码</label>
-        <input type="password" class="form-input" v-model="authPassword" placeholder="至少6位密码" maxlength="32">
+        <label class="form-label">{{t('auth.password')}}</label>
+        <input type="password" class="form-input" v-model="authPassword" :placeholder="t('auth.pw_hint')" maxlength="32">
       </div>
       <div class="auth-error" v-if="authError">{{authError}}</div>
       <button class="btn btn-primary btn-block" @click="doAuth" :disabled="authLoading">
-        {{authLoading ? '请稍候…' : (authMode==='login' ? '登录' : '注册')}}
+        {{authLoading ? t('auth.loading') : (authMode==='login' ? t('btn.login') : t('btn.register'))}}
       </button>
       <div class="auth-switch">
-        <span v-if="authMode==='login'" @click="authMode='register'; authError=''">没有账号？<b>去注册</b></span>
-        <span v-else @click="authMode='login'; authError=''">已有账号？<b>去登录</b></span>
+        <span v-if="authMode==='login'" @click="authMode='register'; authError=''">{{t('auth.no_account')}}</span>
+        <span v-else @click="authMode='login'; authError=''">{{t('auth.has_account')}}</span>
       </div>
     </div>
   </div>
@@ -866,7 +866,7 @@
   <div class="modal-overlay" v-if="showAccountPanel" @click.self="showAccountPanel=false">
     <div class="modal-content account-panel">
       <div class="modal-header">
-        <h3>我的账户</h3>
+        <h3>{{t('auth.my_account')}}</h3>
         <button class="modal-close" @click="showAccountPanel=false">×</button>
       </div>
       <div class="account-info">
@@ -880,21 +880,34 @@
           <span>{{syncTitle}}</span>
         </div>
         <button class="btn btn-outline btn-sm" @click="cloudSync('upload')" :disabled="syncStatus==='syncing'">
-          ☁️ 立即同步
+          {{t('btn.sync')}}
         </button>
       </div>
       <div class="account-actions">
         <button class="btn btn-outline btn-block" @click="cloudSync('download')">
-          📥 从云端恢复数据
+          {{t('btn.restore')}}
         </button>
         <button class="btn btn-block" style="color:var(--rose);margin-top:8px" @click="doLogout">
-          退出登录
+          {{t('btn.logout')}}
         </button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="js/i18n.js"></script>
+<script src="js/i18n-zh-Hans.js"></script>
+<script src="js/i18n-en.js"></script>
+<script src="js/i18n-ja.js"></script>
+<script src="js/i18n-ko.js"></script>
+<script src="js/i18n-es.js"></script>
+<script src="js/i18n-fr.js"></script>
+<script src="js/i18n-de.js"></script>
+<script src="js/i18n-pt-BR.js"></script>
+<script src="js/i18n-ar.js"></script>
+<script src="js/i18n-ru.js"></script>
+<script src="js/i18n-it.js"></script>
+<script src="js/i18n-th.js"></script>
 <script src="js/vue.global.prod.js"></script>
 <script src="js/app.js"></script>
 </body>

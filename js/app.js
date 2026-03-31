@@ -17,13 +17,13 @@ const AVATARS = [
 ];
 
 const MOODS = [
-  { key: 'great',   emoji: '😄', label: '很棒' },
-  { key: 'good',    emoji: '🙂', label: '不错' },
-  { key: 'neutral', emoji: '😐', label: '一般' },
-  { key: 'sad',     emoji: '😔', label: '低落' },
-  { key: 'angry',   emoji: '😤', label: '生气' },
-  { key: 'anxious', emoji: '😰', label: '焦虑' },
-  { key: 'love',    emoji: '🥰', label: '幸福' },
+  { key: 'great',   emoji: '😄', label: t('mood.great') },
+  { key: 'good',    emoji: '🙂', label: t('mood.good') },
+  { key: 'neutral', emoji: '😐', label: t('mood.neutral') },
+  { key: 'sad',     emoji: '😔', label: t('mood.sad') },
+  { key: 'angry',   emoji: '😤', label: t('mood.angry') },
+  { key: 'anxious', emoji: '😰', label: t('mood.anxious') },
+  { key: 'love',    emoji: '🥰', label: t('mood.love') },
 ];
 
 const ALL_TAGS = ['读书','健身','跑步','约会','工作','学习','旅行','购物','美食','电影','音乐','游戏','家务','发呆','加班','聚餐'];
@@ -327,6 +327,11 @@ function formatDate(offset) {
 
 const app = createApp({
   setup() {
+    // ─── i18n ───
+    const t = I18N.t;
+    const currentLang = ref(I18N.getLang());
+    function setLang(code) { I18N.setLang(code); currentLang.value = code; }
+
     // ─── Onboarding / Profile ───
     const profile = ref(lsObj('lp_profile'));
     const showOnboarding = ref(!profile.value);
@@ -491,7 +496,7 @@ const app = createApp({
     // ─── Plan Emoji & Color ───
     const PLAN_EMOJIS = ['📝','☀️','📖','🍜','🏃','🎬','💼','🎯','🧘','🎨','🎵','✈️','🛒','💪','☕','🎮','📸','🌿','🐾','💡'];
     const PLAN_COLORS = [
-      { name: '默认', value: '' },
+      { name: t('color.none'), value: '' },
       { name: '琥珀', value: '#c59a5f' },
       { name: '翡翠', value: '#5f8a6e' },
       { name: '天蓝', value: '#6a9cad' },
@@ -502,8 +507,8 @@ const app = createApp({
     ];
 
     function emptyPlanForm() {
-      const t = nowTime();
-      return { date: today(), time_start: t, time_end: plusHours(t, 2), title: '', location: '', city: planCity.value, category: 'other', notes: '', emoji: '', color: '', widgets: [] };
+      const nt = nowTime();
+      return { date: today(), time_start: nt, time_end: plusHours(nt, 2), title: '', location: '', city: planCity.value, category: 'other', notes: '', emoji: '', color: '', widgets: [] };
     }
     // Widget types: 'pomodoro' | 'counter' | 'micronote'
     const PLAN_WIDGETS = [
@@ -1029,28 +1034,28 @@ const app = createApp({
 
     async function aiPost(url, body) {
       // AI features disabled in static mode
-      return { error: 'AI 功能暂不可用（静态部署模式）' };
+      return { error: t('msg.ai_unavailable') };
     }
 
     async function getHotActivities() {
-      aiPlanResult.value = '提示：静态部署模式下 AI 功能暂不可用，请直接从下方活动列表选择';
+      aiPlanResult.value = t('msg.ai_plan_unavailable');
     }
 
     async function getSuggestPlaces(cat) {
-      aiPlanResult.value = '提示：静态部署模式下 AI 功能暂不可用';
+      aiPlanResult.value = t('msg.ai_unavailable');
     }
 
     async function getTransport(from, to) {
-      aiTransportResult.value = '提示：静态部署模式下 AI 功能暂不可用';
+      aiTransportResult.value = t('msg.ai_unavailable');
     }
 
     async function getLifeReview(period) {
-      aiReviewResult.value = '提示：静态部署模式下 AI 功能暂不可用';
+      aiReviewResult.value = t('msg.ai_unavailable');
     }
 
     // ─── XP & Level System ───
     const XP_TABLE = [0,30,80,150,250,400,600,850,1200,1600,2100,2700,3400,4200,5200,6400,7800,9500,11500,14000];
-    const LEVEL_TITLES = ['初学者','见习者','规划者','记录者','行动派','时光猎手','效率达人','自律之星','时间领主','生活大师'];
+    const LEVEL_TITLES = [t('level.0'),t('level.1'),t('level.2'),t('level.3'),t('level.4'),t('level.5'),t('level.6'),t('level.7'),t('level.8'),t('level.9')];
     const totalXP = ref(parseInt(localStorage.getItem('lp_xp') || '0'));
     const userLevel = computed(() => { let l = 1; for (let i = XP_TABLE.length - 1; i >= 0; i--) { if (totalXP.value >= XP_TABLE[i]) { l = i + 1; break; } } return Math.min(l, XP_TABLE.length); });
     const levelTitle = computed(() => LEVEL_TITLES[Math.min(Math.floor((userLevel.value-1)/2), LEVEL_TITLES.length-1)]);
@@ -1142,7 +1147,7 @@ const app = createApp({
       const months = []; let lastM = '';
       days.forEach((d, i) => {
         const m = d.date.slice(0, 7);
-        if (m !== lastM) { months.push({ label: parseInt(d.date.slice(5, 7)) + '月', offset: (i / days.length) * 100 }); lastM = m; }
+        if (m !== lastM) { months.push({ label: parseInt(d.date.slice(5, 7)) + t('unit.month'), offset: (i / days.length) * 100 }); lastM = m; }
       });
       return months;
     });
@@ -1151,7 +1156,7 @@ const app = createApp({
     const pieCanvas = ref(null);
     const pieDateOffset = ref(0);
     const pieDate = computed(() => { const d = new Date(); d.setDate(d.getDate() + pieDateOffset.value); return toLocalDate(d); });
-    const pieDateLabel = computed(() => { if (pieDateOffset.value === 0) return '今天'; if (pieDateOffset.value === -1) return '昨天'; return pieDate.value; });
+    const pieDateLabel = computed(() => { if (pieDateOffset.value === 0) return t('date.today'); if (pieDateOffset.value === -1) return t('date.yesterday'); return pieDate.value; });
     const PIE_COLORS = ['#c59a5f','#7cb8ca','#a494c4','#e08888','#7aad8b','#5ab8c7','#c99aaa','#8a9ab0','#f0c674','#66bb6a'];
     const pieSlices = computed(() => {
       const dayPlans = plans.value.filter(p => p.date === pieDate.value && p.time_start && p.time_end);
@@ -1161,7 +1166,7 @@ const app = createApp({
         const [sh, sm] = p.time_start.split(':').map(Number);
         const [eh, em] = p.time_end.split(':').map(Number);
         const hours = Math.max(0, ((eh * 60 + em) - (sh * 60 + sm)) / 60);
-        const cat = p.category || p.title || '其他';
+        const cat = p.category || p.title || t('cat.other');
         cats[cat] = (cats[cat] || 0) + hours;
       });
       const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
@@ -1199,7 +1204,7 @@ const app = createApp({
       const diaryCount = mDiary.length;
       // Top category
       const catCount = {};
-      mPlans.forEach(p => { const c = p.category || '其他'; catCount[c] = (catCount[c] || 0) + 1; });
+      mPlans.forEach(p => { const c = p.category || t('cat.other'); catCount[c] = (catCount[c] || 0) + 1; });
       const topCategory = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
       // Top mood
       const moodCount = {};
@@ -1210,32 +1215,32 @@ const app = createApp({
       let insight = '';
       if (total > 0) {
         const rate = Math.round(completed / total * 100);
-        if (rate >= 80) insight = `完成率${rate}%，太棒了！继续保持这个节奏 💪`;
-        else if (rate >= 50) insight = `完成率${rate}%，还不错，再加把劲就更好了 🌟`;
-        else insight = `完成率${rate}%，试试减少计划数量，专注最重要的事 🎯`;
+        if (rate >= 80) insight = t('insight.great', rate);
+        else if (rate >= 50) insight = t('insight.good', rate);
+        else insight = t('insight.low', rate);
       }
-      if (diaryCount >= 20) insight += ' 日记写得很勤快，坚持记录真的很棒！';
+      if (diaryCount >= 20) insight += ' '+t('insight.diary_good');
       return { total, completed, diaryCount, topCategory, topMood, insight };
     });
 
     // ─── Achievement Badges ───
     const BADGE_DEFS = [
-      { id: 'early_bird', name: '早鸟', icon: '🐦', desc: '连续3天有8:00前的计划', check: () => { let streak = 0, maxS = 0; const d = new Date(); for (let i = 0; i < 30; i++) { const ds = toLocalDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() - i)); const early = plans.value.some(p => p.date === ds && p.time_start && p.time_start < '08:00'); if (early) { streak++; maxS = Math.max(maxS, streak); } else streak = 0; } return maxS >= 3; }},
-      { id: 'assassin', name: '时间刺客', icon: '⚡', desc: '一天内完成5个以上任务', check: () => { const byDate = {}; plans.value.filter(p => p.done).forEach(p => { byDate[p.date] = (byDate[p.date] || 0) + 1; }); return Object.values(byDate).some(c => c > 5); }},
-      { id: 'writer', name: '碎碎念', icon: '✍️', desc: '日记总字数超过5000字', check: () => diaryEntries.value.reduce((s, e) => s + (e.content?.length || 0), 0) >= 5000 },
-      { id: 'streak3', name: '三日坚持', icon: '🔥', desc: '连续3天完成计划', check: () => statsOverview.value.streak >= 3 },
-      { id: 'streak7', name: '周周不断', icon: '💎', desc: '连续7天完成计划', check: () => statsOverview.value.streak >= 7 },
-      { id: 'streak30', name: '月度之星', icon: '🌟', desc: '连续30天完成计划', check: () => statsOverview.value.streak >= 30 },
-      { id: 'planner50', name: '计划达人', icon: '📋', desc: '累计创建50个计划', check: () => plans.value.length >= 50 },
-      { id: 'planner200', name: '规划大师', icon: '🏆', desc: '累计创建200个计划', check: () => plans.value.length >= 200 },
-      { id: 'diary10', name: '记录者', icon: '📖', desc: '累计写10篇日记', check: () => diaryEntries.value.length >= 10 },
-      { id: 'diary50', name: '日记作家', icon: '📚', desc: '累计写50篇日记', check: () => diaryEntries.value.length >= 50 },
-      { id: 'mood_happy', name: '开心果', icon: '😄', desc: '记录10次开心心情', check: () => diaryEntries.value.filter(e => e.mood === 'great').length >= 10 },
-      { id: 'focus_first', name: '初次专注', icon: '🌱', desc: '完成第一次番茄钟', check: () => focusHistory.value.length >= 1 },
-      { id: 'focus10', name: '专注高手', icon: '🌳', desc: '累计专注10次', check: () => focusHistory.value.length >= 10 },
-      { id: 'capsule', name: '时光旅人', icon: '💌', desc: '写下第一封时光胶囊', check: () => capsules.value.length >= 1 },
-      { id: 'explorer', name: '城市探索', icon: '🗺️', desc: '计划涉及3个不同城市', check: () => new Set(plans.value.map(p => p.city).filter(Boolean)).size >= 3 },
-      { id: 'allmoods', name: '百感交集', icon: '🎭', desc: '使用过所有7种心情', check: () => new Set(diaryEntries.value.map(e => e.mood).filter(Boolean)).size >= 7 },
+      { id: 'early_bird', name: t('badge.early_bird'), icon: '🐦', desc: t('badge.early_bird_desc'), check: () => { let streak = 0, maxS = 0; const d = new Date(); for (let i = 0; i < 30; i++) { const ds = toLocalDate(new Date(d.getFullYear(), d.getMonth(), d.getDate() - i)); const early = plans.value.some(p => p.date === ds && p.time_start && p.time_start < '08:00'); if (early) { streak++; maxS = Math.max(maxS, streak); } else streak = 0; } return maxS >= 3; }},
+      { id: 'assassin', name: t('badge.assassin'), icon: '⚡', desc: t('badge.assassin_desc'), check: () => { const byDate = {}; plans.value.filter(p => p.done).forEach(p => { byDate[p.date] = (byDate[p.date] || 0) + 1; }); return Object.values(byDate).some(c => c > 5); }},
+      { id: 'writer', name: t('badge.writer'), icon: '✍️', desc: t('badge.writer_desc'), check: () => diaryEntries.value.reduce((s, e) => s + (e.content?.length || 0), 0) >= 5000 },
+      { id: 'streak3', name: t('badge.streak3'), icon: '🔥', desc: t('badge.streak3_desc'), check: () => statsOverview.value.streak >= 3 },
+      { id: 'streak7', name: t('badge.streak7'), icon: '💎', desc: t('badge.streak7_desc'), check: () => statsOverview.value.streak >= 7 },
+      { id: 'streak30', name: t('badge.streak30'), icon: '🌟', desc: t('badge.streak30_desc'), check: () => statsOverview.value.streak >= 30 },
+      { id: 'planner50', name: t('badge.planner50'), icon: '📋', desc: t('badge.planner50_desc'), check: () => plans.value.length >= 50 },
+      { id: 'planner200', name: t('badge.planner200'), icon: '🏆', desc: t('badge.planner200_desc'), check: () => plans.value.length >= 200 },
+      { id: 'diary10', name: t('badge.diary10'), icon: '📖', desc: t('badge.diary10_desc'), check: () => diaryEntries.value.length >= 10 },
+      { id: 'diary50', name: t('badge.diary50'), icon: '📚', desc: t('badge.diary50_desc'), check: () => diaryEntries.value.length >= 50 },
+      { id: 'mood_happy', name: t('badge.mood_happy'), icon: '😄', desc: t('badge.mood_happy_desc'), check: () => diaryEntries.value.filter(e => e.mood === 'great').length >= 10 },
+      { id: 'focus_first', name: t('badge.focus_first'), icon: '🌱', desc: t('badge.focus_first_desc'), check: () => focusHistory.value.length >= 1 },
+      { id: 'focus10', name: t('badge.focus10'), icon: '🌳', desc: t('badge.focus10_desc'), check: () => focusHistory.value.length >= 10 },
+      { id: 'capsule', name: t('badge.capsule'), icon: '💌', desc: t('badge.capsule_desc'), check: () => capsules.value.length >= 1 },
+      { id: 'explorer', name: t('badge.explorer'), icon: '🗺️', desc: t('badge.explorer_desc'), check: () => new Set(plans.value.map(p => p.city).filter(Boolean)).size >= 3 },
+      { id: 'allmoods', name: t('badge.allmoods'), icon: '🎭', desc: t('badge.allmoods_desc'), check: () => new Set(diaryEntries.value.map(e => e.mood).filter(Boolean)).size >= 7 },
     ];
     const allBadges = computed(() => BADGE_DEFS.map(b => ({ ...b, unlocked: b.check() })));
     const unlockedBadgeCount = computed(() => allBadges.value.filter(b => b.unlocked).length);
@@ -1280,11 +1285,11 @@ const app = createApp({
     const ambientSound = ref('');
     let _ambientAudio = null;
     const AMBIENT_SOUNDS = [
-      { key: '', icon: '🔇', label: '无声' },
-      { key: 'rain', icon: '🌧️', label: '雨声' },
-      { key: 'cafe', icon: '☕', label: '咖啡馆' },
-      { key: 'fire', icon: '🔥', label: '笝火' },
-      { key: 'wave', icon: '🌊', label: '海浪' },
+      { key: '', icon: '🔇', label: t('ambient.off') },
+      { key: 'rain', icon: '🌧️', label: t('ambient.rain') },
+      { key: 'cafe', icon: '☕', label: t('ambient.cafe') },
+      { key: 'fire', icon: '🔥', label: t('ambient.fire') },
+      { key: 'wave', icon: '🌊', label: t('ambient.wave') },
     ];
     // Use Web Audio API for white noise generation
     let _noiseCtx = null, _noiseNode = null, _noiseGain = null;
@@ -1379,7 +1384,7 @@ const app = createApp({
     watch(pieDateOffset, () => nextTick(drawPieChart));
 
     // ─── Hot Events ───
-    const hotCategory = ref('全部');
+    const hotCategory = ref(t('hot.all'));
     const hotExpanded = ref(false);
     const allCityEvents = computed(() => {
       const city = planCity.value;
@@ -1387,20 +1392,20 @@ const app = createApp({
     });
     const hotCategories = computed(() => {
       const tags = [...new Set(allCityEvents.value.map(e => e.tag))];
-      return ['全部', ...tags];
+      return [t('hot.all'), ...tags];
     });
     const hotEvents = computed(() => {
       const cat = hotCategory.value;
-      const list = cat === '全部' ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
+      const list = cat === t('hot.all') ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
       return hotExpanded.value ? list : list.slice(0, 4);
     });
     const hotHasMore = computed(() => {
       const cat = hotCategory.value;
-      const list = cat === '全部' ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
+      const list = cat === t('hot.all') ? allCityEvents.value : allCityEvents.value.filter(e => e.tag === cat);
       return list.length > 4;
     });
     watch(hotCategory, () => { hotExpanded.value = false; });
-    watch(planCity, () => { hotCategory.value = '全部'; hotExpanded.value = false; });
+    watch(planCity, () => { hotCategory.value = t('hot.all'); hotExpanded.value = false; });
     function toggleHotExpand() { hotExpanded.value = !hotExpanded.value; }
     const hotDetail = ref(null); // currently viewed event detail
     function openHotDetail(ev) { hotDetail.value = ev; }
@@ -1417,7 +1422,7 @@ const app = createApp({
     let _fromHotEvent = false;
     function addHotEvent(ev) {
       const evDate = parseEventDate(ev.date);
-      const notes = [`${ev.tag} · ${ev.date}`, ev.addr ? `地址: ${ev.addr}` : '', ev.route ? `交通: ${ev.route}` : '', ev.docs ? `证件: ${ev.docs}` : '', ev.tips ? `提示: ${ev.tips}` : ''].filter(Boolean).join('\n');
+      const notes = [`${ev.tag} · ${ev.date}`, ev.addr ? `${t('hot.addr')}: ${ev.addr}` : '', ev.route ? `${t('hot.transit')}: ${ev.route}` : '', ev.docs ? `证件: ${ev.docs}` : '', ev.tips ? `提示: ${ev.tips}` : ''].filter(Boolean).join('\n');
       planForm.value = { ...emptyPlanForm(), date: evDate, city: planCity.value, title: ev.title, category: 'other', location: ev.loc || ev.addr || '', notes };
       activityQuery.value = ev.title;
       addressQuery.value = ev.addr || ev.loc || '';
@@ -1453,8 +1458,8 @@ const app = createApp({
     const showAccountPanel = ref(false);
     const syncStatus = ref(authToken.value ? 'idle' : 'idle');
     const syncTitle = computed(() => {
-      if (!authToken.value) return '未登录';
-      const m = { idle: '等待同步', syncing: '同步中…', synced: '已同步', error: '同步失败' };
+      if (!authToken.value) return t('sync.no_login');
+      const m = { idle: t('sync.idle'), syncing: t('sync.syncing'), synced: t('sync.done'), error: t('sync.error') };
       return m[syncStatus.value] || '';
     });
 
@@ -1470,8 +1475,8 @@ const app = createApp({
       authError.value = '';
       const email = authEmail.value.trim().toLowerCase();
       const password = authPassword.value;
-      if (!email || !email.includes('@')) { authError.value = '请输入有效的邮箱地址'; return; }
-      if (!password || password.length < 6) { authError.value = '密码至少6位'; return; }
+      if (!email || !email.includes('@')) { authError.value = t('auth.invalid_email'); return; }
+      if (!password || password.length < 6) { authError.value = t('auth.pw_short'); return; }
       authLoading.value = true;
       try {
         const endpoint = authMode.value === 'register' ? '/api/tl/register' : '/api/tl/login';
@@ -1481,7 +1486,7 @@ const app = createApp({
           body: JSON.stringify({ email, password, nickname: profile.value?.nickname || '' }),
         });
         const data = await resp.json();
-        if (!resp.ok) { authError.value = data.error || '操作失败'; return; }
+        if (!resp.ok) { authError.value = data.error || t('auth.fail'); return; }
         authToken.value = data.token;
         localStorage.setItem('lp_token', data.token);
         localStorage.setItem('lp_email', email);
@@ -1489,7 +1494,7 @@ const app = createApp({
         authPassword.value = '';
         await cloudSync('upload');
       } catch (e) {
-        authError.value = '网络错误，请检查网络连接';
+        authError.value = t('auth.network');
       } finally {
         authLoading.value = false;
       }
@@ -1572,6 +1577,8 @@ const app = createApp({
     });
 
     return {
+      // i18n
+      t, currentLang, setLang, i18nLangs: I18N.getLangs(),
       // Onboarding
       showOnboarding, onboardStep, obNickname, obAvatar, obCity, obAge,
       onboardNext, onboardBack, profile,
