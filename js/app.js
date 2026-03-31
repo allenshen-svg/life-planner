@@ -1337,11 +1337,41 @@ const app = createApp({
       if (changed) lsSave('lp_capsules', capsules.value);
     }
 
+    // ─── Registration Nudge (7 days after install) ───
+    const showRegNudge = ref(false);
+    function checkRegNudge() {
+      if (authToken.value) return; // already registered
+      if (localStorage.getItem('lp_reg_dismissed')) return; // user dismissed
+      let installTs = localStorage.getItem('lp_install_ts');
+      if (!installTs) {
+        localStorage.setItem('lp_install_ts', String(Date.now()));
+        return; // just installed, don't show yet
+      }
+      const daysSinceInstall = (Date.now() - parseInt(installTs)) / (1000 * 60 * 60 * 24);
+      if (daysSinceInstall >= 7) {
+        showRegNudge.value = true;
+      }
+    }
+    function dismissRegNudge() {
+      showRegNudge.value = false;
+      localStorage.setItem('lp_reg_dismissed', '1');
+    }
+    function acceptRegNudge() {
+      showRegNudge.value = false;
+      showAuthModal.value = true;
+    }
+
     // ─── Init ───
     onMounted(() => {
       loadPlans();
       loadDiary();
       checkCapsules();
+      // Record install time for new users
+      if (!localStorage.getItem('lp_install_ts')) {
+        localStorage.setItem('lp_install_ts', String(Date.now()));
+      }
+      // Check registration nudge after short delay
+      setTimeout(checkRegNudge, 3000);
     });
 
     // Draw charts when switching to insights tab
@@ -1600,6 +1630,8 @@ const app = createApp({
       authToken, authEmail, authPassword, authMode, authError, authLoading,
       showAuthModal, showAccountPanel, syncStatus, syncTitle,
       onProfileClick, doAuth, doLogout, cloudSync,
+      // Registration Nudge
+      showRegNudge, dismissRegNudge, acceptRegNudge,
     };
   }
 });
